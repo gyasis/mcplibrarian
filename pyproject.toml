@@ -1,0 +1,54 @@
+[project]
+name = "mcp-librarian"
+version = "0.1.0a1"
+description = "Save 97% of your tokens. Check out MCP tools only when needed - like a library."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "MCP Librarian Contributors"}
+]
+keywords = ["mcp", "docker", "claude", "ai", "llm", "toolhost", "lazy-loading", "token-optimization", "librarian"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: System :: Containers",
+]
+
+dependencies = [
+    "docker>=7.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "mypy>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/gyasis/mcplibrarian"
+Documentation = "https://github.com/gyasis/mcplibrarian/tree/main/docs"
+Repository = "https://github.com/gyasis/mcplibrarian"
+Issues = "https://github.com/gyasis/mcplibrarian/issues"
+
+[project.scripts]
+mcp-librarian = "mcp_librarian:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
