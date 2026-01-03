@@ -626,33 +626,42 @@ python mcp-librarian.py ~/mcp-server/
 
 ---
 
-## 💰 Cost Savings Calculator
+## 💰 The Real Cost Savings
 
-### Token Costs (at $3 per million input tokens)
+### Token Savings: 97.3% Reduction
 
-**Your setup**: 20 servers × 15 tools = 300 tools
+With **20 MCP servers** and **300 tools**, you're looking at:
+- **Traditional approach**: 75,000 tokens wasted at every session start
+- **MCP Librarian**: 2,000 tokens (just the polymorphic tools)
+- **Savings**: 73,000 tokens per session
 
-| Sessions | Traditional (75k tokens) | MCP Librarian (2k tokens) | Savings |
-|----------|-------------------------|---------------------------|---------|
-| 100 | $22.50 | $0.60 | $21.90 (97.3%) |
-| 1,000 | $225.00 | $6.00 | $219.00 (97.3%) |
-| 10,000 | $2,250.00 | $60.00 | $2,190.00 (97.3%) |
+That's 97.3% of your context window back for actual work instead of tool schemas you'll never use.
 
-### Developer Time Costs (at $100/hour)
+### Time Savings: Stop The Manual Management Grind
 
-**Manual enable/disable time**: 5-10 minutes per change × 5-10 times per day = **30-100 min/day wasted**
+**The old way** (manual enable/disable):
+- 5-10 minutes every time you need to change which servers are enabled
+- 5-10 times per day on average
+- **30-100 minutes wasted daily** just managing your tools
+- Lost context every time you restart
+- Frustration and broken flow state
 
-| Workflow | Monthly Time Lost | Monthly Cost Lost | MCP Librarian | Savings |
-|----------|------------------|-------------------|---------------|---------|
-| Manual MCP management | 20-40 hours/month | $2,000-$4,000 | $0 | **100%** |
-| Dockerization setup | 50 hours (20 servers) | $5,000 | 3 hours | $4,700 (94%) |
+**With MCP Librarian**:
+- Zero manual management
+- Never restart Claude Code
+- Never lose context
+- Just ask for what you need - the librarian handles everything
 
-**Total Savings** (20 servers, 1,000 sessions, 1 month):
-- Token savings: $219/month
-- Manual management time: $2,000-$4,000/month
-- Setup time: $4,700 (one-time)
-- **Total first month: $6,919-$8,919** 🎉
-- **Every month after: $2,219-$4,219** 🚀
+### Setup Time: 90% Automation
+
+**Manual dockerization** of 20 servers:
+- ~2.5 hours per server × 20 = **50 hours of tedious work**
+
+**MCP Librarian automation**:
+- ~9 minutes per server × 20 = **3 hours total**
+- 94% time savings on setup
+
+**The bottom line**: More time coding, less time managing infrastructure. That's what MCP Librarian is all about.
 
 ---
 
