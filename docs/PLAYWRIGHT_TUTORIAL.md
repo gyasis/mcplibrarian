@@ -333,46 +333,61 @@ Claude sees 1 polymorphic tool:
 
 ---
 
-## 🔧 Manual Steps (Proxy Integration)
+## 🎯 How the Architecture Works (No Manual Steps Needed!)
 
-The automated cataloging created routing rules in `routing_rules.py`. To complete the integration, you need to manually add these to your `mcp-proxy.py`:
+The MCP Librarian uses **automatic tool exposure** - no manual routing code required!
 
-```python
-# routing_rules.py content
-def route_playwright_query(query: str):
-    """Route natural language queries to Playwright tools."""
-    query_lower = query.lower()
+### The Dynamic Tool Exposure Pattern
 
-    # Navigation
-    if any(kw in query_lower for kw in ["navigate", "goto", "visit", "open"]):
-        url_match = re.search(r'https?://\S+', query)
-        if url_match:
-            return ("browser_navigate", {"url": url_match.group()})
-
-    # Clicking
-    if "click" in query_lower:
-        element = extract_element_description(query)
-        return ("browser_click", {"element": element})
-
-    # Typing
-    if any(kw in query_lower for kw in ["type", "enter", "input"]):
-        text = extract_text_to_type(query)
-        element = extract_element_description(query)
-        return ("browser_type", {"element": element, "text": text})
-
-    # Screenshots
-    if "screenshot" in query_lower:
-        return ("browser_take_screenshot", {})
-
-    # Default: return query for manual routing
-    return (None, {"raw_query": query})
+**Phase 1: Container Stopped (Token Efficient)**
+```
+Claude sees: playwright_query(query: string)
+Token cost: ~100 tokens
 ```
 
-**Integration steps**:
-1. Copy routing logic from `routing_rules.py`
-2. Add to `mcp-proxy.py` in the routing section
-3. Update registry with polymorphic tool definition
-4. Restart Claude Code to load new configuration
+**Phase 2: Container Running (Full Access)**
+```
+User: "navigate to example.com"
+  ↓
+Claude calls: playwright_query("navigate to example.com")
+  ↓
+Proxy starts container → tools/list_changed notification sent
+  ↓
+Claude re-queries tools/list
+  ↓
+Claude NOW sees ALL 43 Playwright tools:
+  - browser_navigate(url)
+  - browser_click(element, ref)
+  - browser_screenshot(...)
+  ... (40 more tools with full schemas)
+
+Token cost: ~10,650 tokens (only while container running)
+  ↓
+Claude selects best tool based on:
+  - Tool descriptions
+  - Parameter schemas
+  - User's request context
+  ↓
+Direct tool call: browser_navigate(url="example.com")
+```
+
+### Why No Manual Routing Needed
+
+**The proxy automatically**:
+1. Exposes polymorphic tool when container is stopped
+2. Starts container when polymorphic tool is called
+3. Sends `tools/list_changed` notification
+4. Exposes ALL actual tools when container is running
+5. Claude's built-in tool selection picks the right tool
+
+**You get**:
+- ✅ 100% tool coverage (all 43 tools accessible)
+- ✅ Zero manual routing code
+- ✅ Token efficiency (99% savings when stopped)
+- ✅ Full tool schemas (when running)
+- ✅ Semantic tool selection by Claude
+
+**The `routing_rules.py` file is included as reference** but is NOT needed for the proxy to work!
 
 ---
 

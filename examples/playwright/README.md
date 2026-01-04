@@ -215,6 +215,38 @@ playwright_query("take a screenshot")
 
 **Result**: 100 tokens consumed, simple natural language interface.
 
+## 🎯 How It Works: Dynamic Tool Exposure
+
+**No manual integration needed!** The MCP proxy automatically handles tool exposure:
+
+### When Container is Stopped
+```
+Claude sees: 1 polymorphic tool
+- playwright_query(query: string)
+Token cost: ~100 tokens
+```
+
+### When Container is Running
+```
+Claude sees: ALL 43 Playwright tools
+- browser_navigate(url)
+- browser_click(element, ref)
+- browser_screenshot(...)
+- ... (40 more tools)
+Token cost: ~10,650 tokens (only while running)
+```
+
+### The Workflow
+1. User: "navigate to example.com"
+2. Claude calls: `playwright_query("navigate to example.com")`
+3. Proxy starts container → sends `tools/list_changed` notification
+4. Claude re-queries tools/list → sees ALL 43 tools
+5. Claude picks best tool: `browser_navigate(url="example.com")`
+6. Container executes → returns result
+7. After 5 min idle → container auto-stops → back to polymorphic tool
+
+**Key Point**: Claude's native tool selection handles routing - no manual code needed!
+
 ## 🔧 Integration with mcp-proxy.py
 
 To integrate this example with the MCP proxy:
@@ -242,17 +274,14 @@ To integrate this example with the MCP proxy:
 }
 ```
 
-2. **Add Routing Logic** to `mcp-proxy.py`:
+2. **Restart Claude Code** to load the new configuration.
 
-```python
-# Copy the routing logic from routing_rules.py
-def _route_playwright_call(self, query: str) -> dict:
-    """Route natural language query to Playwright tool."""
-    # Implementation from routing_rules.py
-    ...
-```
-
-3. **Restart Claude Code** to load the new configuration.
+**That's it!** The proxy automatically handles:
+- Exposing polymorphic tool when container is stopped
+- Starting container on first call
+- Sending `tools/list_changed` notification
+- Exposing ALL 43 tools when container is running
+- Claude's native tool selection does the routing
 
 ## 📈 Scaling This Pattern
 
