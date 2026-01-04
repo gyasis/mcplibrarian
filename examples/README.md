@@ -6,9 +6,29 @@ This directory contains real-world examples of dockerized MCP servers using the 
 
 ## Available Examples
 
+### ✅ playwright (Node.js) - **AVAILABLE NOW**
+
+**Location**: [`examples/playwright/`](playwright/)
+
+Browser automation and testing with 43 tools consolidated into 1 polymorphic tool.
+
+**What You'll Learn**:
+- How to wrap npx-based MCP servers
+- The polymorphic tool pattern
+- Real troubleshooting (docker-compose.yml fixes, package-lock.json)
+- 99% token savings (10,550 tokens saved)
+
+**Files Included**:
+- Complete working example with all generated files
+- Comprehensive README with testing instructions
+- Routing rules for natural language queries
+- [Step-by-step tutorial](../docs/PLAYWRIGHT_TUTORIAL.md)
+
+---
+
 ### Coming Soon
 
-We're building a library of examples covering:
+We're building a library of additional examples covering:
 
 1. **deeplake-rag** (Python)
    - Vector database RAG server
@@ -194,22 +214,22 @@ Want to see a specific server type documented?
 ## Coming Soon
 
 📅 **January 2026**:
-- deeplake-rag example
-- gemini-mcp-server example
-- playwright-mcp example
+- ✅ ~~playwright-mcp example~~ **COMPLETED!**
+- deeplake-rag example (Python vector database)
+- gemini-mcp-server example (AI integration)
 
 📅 **February 2026**:
-- snowflake-mcp example
-- gmail-mcp example
+- snowflake-mcp example (data warehouse)
+- gmail-mcp example (email automation)
 - typescript-server template
 
 📅 **March 2026**:
 - Go server example
 - Rust server example
-- Multi-container example
+- Multi-container orchestration example
 
 ---
 
-*Check back soon for the first examples!*
+*First example is live! Check out [playwright/](playwright/) for a complete working example.*
 
 For questions about examples, see [CONTRIBUTING.md](../CONTRIBUTING.md) or open a **GitHub Discussion**.

@@ -409,6 +409,10 @@ That's 97.3% of your context window back for actual work instead of tool schemas
 ### Detailed Guides
 - [**AUTOMATED_CATALOGING.md**](docs/MCP_DOCKERIZE_GUIDE.md) - Automated cataloging (15 pages)
 - [**MANUAL_CATALOGING.md**](docs/MANUAL_DOCKERIZATION_GUIDE.md) - Manual cataloging (25 pages)
+- [**PLAYWRIGHT_TUTORIAL.md**](docs/PLAYWRIGHT_TUTORIAL.md) - Step-by-step Playwright example with troubleshooting
+
+### Examples
+- [**playwright/**](examples/playwright/) - Complete Playwright cataloging example with all files
 
 ### Community
 - [**CONTRIBUTING.md**](CONTRIBUTING.md) - Help expand the library
