@@ -312,6 +312,18 @@ class ContainerManager:
         if servers_to_stop and self.on_container_change:
             self.on_container_change()
 
+    def get_running_containers(self) -> List[str]:
+        """Get list of currently running server names.
+
+        Returns:
+            List of server names whose containers are running
+        """
+        running = []
+        for server_name in self.registry["servers"].keys():
+            if self.is_container_running(server_name):
+                running.append(server_name)
+        return running
+
     def get_status(self) -> dict:
         """Get status of all containers.
 

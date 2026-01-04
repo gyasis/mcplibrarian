@@ -200,6 +200,27 @@ class MCPProxy:
             print(f"Error running container: {e}", file=sys.stderr)
             return None
 
+    def _load_manifest(self, manifest_path: str) -> Optional[dict]:
+        """Load tool manifest from file.
+
+        Args:
+            manifest_path: Path to the manifest JSON file
+
+        Returns:
+            Manifest dictionary or None if not found
+        """
+        manifest_file = Path(manifest_path).expanduser()
+        if not manifest_file.exists():
+            print(f"Warning: Manifest not found at {manifest_path}", file=sys.stderr)
+            return None
+
+        try:
+            with open(manifest_file, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading manifest {manifest_path}: {e}", file=sys.stderr)
+            return None
+
     def _handle_initialize(self, request: dict) -> dict:
         """Handle MCP initialize request.
 
@@ -227,48 +248,68 @@ class MCPProxy:
         }
 
     def _handle_tools_list(self, request: dict) -> dict:
-        """Handle tools/list request.
+        """Handle tools/list request with dynamic tool exposure.
 
-        Toolhost Pattern (Production-Proven):
-        - Expose 1 polymorphic tool per server (~25 tokens each)
-        - Each tool accepts natural language queries
-        - Proxy routes queries to actual tools via keyword matching
-        - Add 1 documentation tool for transparency
+        Dynamic Tool Exposure Pattern:
+        - STOPPED containers: Show 1 polymorphic tool (~100 tokens)
+        - RUNNING containers: Show ALL actual tools from manifest
+        - This enables polymorphic activation + full tool access
 
-        This achieves 96-99% token savings vs exposing all tools.
-        Pattern validated in: Momentum FHIR, MarkItDown, Elastic Path, Moncoder.
+        Architecture:
+        1. User calls polymorphic tool (e.g., playwright_query)
+        2. Container starts → tools/list_changed notification sent
+        3. Claude re-queries tools/list → sees ALL 43 Playwright tools
+        4. Claude can now call actual tools directly (browser_navigate, etc.)
 
         Args:
             request: The tools/list request
 
         Returns:
-            Tools list with polymorphic tools + documentation tool
+            Tools list based on container states
         """
-        toolhost_tools = []
+        tools = []
+        running_containers = self.manager.get_running_containers()
 
-        # 1. Create polymorphic tool for each server
+        print(f"📋 Tools/list request - Running containers: {running_containers}", file=sys.stderr)
+
+        # Process each server based on container state
         for server_name, config in self.manager.registry["servers"].items():
-            friendly_name = config.get("friendly_name", server_name)
-            description = config.get("description", f"{server_name} server")
+            if server_name in running_containers:
+                # RUNNING: Expose FULL tools from manifest
+                manifest_path = config.get("manifest_path")
+                if manifest_path:
+                    manifest = self._load_manifest(manifest_path)
+                    if manifest and "tools" in manifest:
+                        actual_tools = manifest["tools"]
+                        tools.extend(actual_tools)
+                        print(f"  ✅ {server_name}: RUNNING → Exposing {len(actual_tools)} actual tools", file=sys.stderr)
+                    else:
+                        print(f"  ⚠️  {server_name}: RUNNING but no manifest found", file=sys.stderr)
+                else:
+                    print(f"  ⚠️  {server_name}: RUNNING but no manifest_path in config", file=sys.stderr)
+            else:
+                # STOPPED: Expose polymorphic tool
+                friendly_name = config.get("friendly_name", server_name)
+                description = config.get("description", f"{server_name} server")
 
-            polymorphic_tool = {
-                "name": f"{server_name.replace('-', '_')}_query",
-                "description": f"Query {friendly_name} using natural language. {description}",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "Natural language query (e.g., 'search for X', 'find recent Y', 'get document Z')"
-                        }
-                    },
-                    "required": ["query"]
+                polymorphic_tool = {
+                    "name": f"{server_name.replace('-', '_')}_query",
+                    "description": f"Query {friendly_name} using natural language. {description}",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "query": {
+                                "type": "string",
+                                "description": "Natural language query (e.g., 'search for X', 'find recent Y', 'get document Z')"
+                            }
+                        },
+                        "required": ["query"]
+                    }
                 }
-            }
-            toolhost_tools.append(polymorphic_tool)
-            print(f"Added polymorphic tool: {polymorphic_tool['name']}", file=sys.stderr)
+                tools.append(polymorphic_tool)
+                print(f"  💤 {server_name}: STOPPED → Exposing 1 polymorphic tool", file=sys.stderr)
 
-        # 2. Add documentation tool for transparency
+        # Always add documentation tool for transparency
         doc_tool = {
             "name": "get_server_documentation",
             "description": "Get detailed capabilities and available operations for a specific MCP server",
@@ -284,17 +325,16 @@ class MCPProxy:
                 "required": ["server_name"]
             }
         }
-        toolhost_tools.append(doc_tool)
+        tools.append(doc_tool)
 
         server_count = len(self.manager.registry["servers"])
-        print(f"🎯 Toolhost Pattern: Returning {len(toolhost_tools)} tools ({server_count} polymorphic + 1 doc)", file=sys.stderr)
-        print(f"   Token savings: ~96% vs Lazy Init (exposing {server_count} vs {server_count * 6} tools)", file=sys.stderr)
+        print(f"🎯 Dynamic Exposure: Returning {len(tools)} tools ({len(running_containers)} running, {server_count - len(running_containers)} stopped + 1 doc)", file=sys.stderr)
 
         return {
             "jsonrpc": "2.0",
             "id": request.get("id"),
             "result": {
-                "tools": toolhost_tools
+                "tools": tools
             }
         }
 

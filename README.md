@@ -8,196 +8,87 @@ Stop dumping all your tools on Claude's desk. Let the librarian fetch them on-de
 
 ---
 
-## 🎯 The Problem: The Overwhelmed Desk
+## 🎯 The Problem: Token Bloat
 
-Imagine walking into a library for help with one assignment, and the librarian **dumps every single book in the library onto your desk**:
+**My wake-up call**: I was hitting 240,000 tokens at startup with 80+ MCP servers - exceeding my 200,000 token budget before asking a single question. Sessions were failing to start.
 
-```
-❌ Traditional MCP Setup:
-   You: "I need help with one research question"
-   System: *dumps 240,000 books on your desk*
-   You: "I can't even see my assignment anymore!"
-```
-
-**This is what happens with traditional MCP servers:**
+**The math with a more typical setup** (20 servers × 15 tools):
 
 ```
-80 MCP servers × 3,000 tokens each = 240,000 tokens
+300 total tools × 250 tokens per schema = 75,000 tokens
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-EXCEEDS 200,000 token budget by 40,000!
-You can't even start your session! 😱
+37.5% of your token budget GONE before you start
+(And you'll only use 2-3 of those tools per session)
 ```
 
-**Research shows this is a massive problem:**
-- [Anthropic's Tool Use Blog](https://www.anthropic.com/engineering/advanced-tool-use): "Front-loading all tools wastes 85% of context on tools you'll never use"
-- [Cloudflare MCP Analysis](https://www.speakeasy.com/blog/how-we-reduced-token-usage-by-100x-dynamic-toolsets-v2): "Schemas represent 60-80% of token usage in static toolsets"
-- [Scott Spence's Real-World Data](https://scottspence.com/posts/optimising-mcp-server-context-usage-in-claude-code): "66,000+ tokens consumed before conversation even starts"
+**Research confirms this is widespread**:
+- [Anthropic](https://www.anthropic.com/engineering/advanced-tool-use): "Front-loading wastes 85% of context on unused tools"
+- [Cloudflare](https://www.speakeasy.com/blog/how-we-reduced-token-usage-by-100x-dynamic-toolsets-v2): "Schemas = 60-80% of token usage"
+- [Scott Spence](https://scottspence.com/posts/optimising-mcp-server-context-usage-in-claude-code): "66,000+ tokens consumed before conversation starts"
 
 ---
 
-## 💡 The Solution: The Smart Librarian
+## 💡 The Solution
 
-**MCP Librarian** works like a real library:
-
-```
-✅ MCP Librarian Approach:
-   You: "I need help with research on X"
-   Librarian: "Let me check that out for you..."
-   Librarian: *brings you exactly 1 relevant book*
-   You: "Perfect! I have 192,000 tokens left for my work!"
-```
-
-**How it works:**
-
-```
-80 MCP servers × 100 tokens each = 8,000 tokens
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SAVES 232,000 tokens (97% reduction!)
-192,000 tokens available for actual work! 🎉
-```
+| Manual MCP Management | MCP Librarian |
+|----------------------|---------------|
+| 🔧 Edit config → disable 17 servers → restart | 💬 Just ask for what you need |
+| ⏱️ 5 minutes to disable servers | ⚡ Instant, automatic activation |
+| 🔄 Need a tool? Re-enable → restart → lose context | 🎯 Tool loaded seamlessly, keep context |
+| 😫 Repeat this cycle 5-10 times per day | 😊 Never think about it again |
+| 📚 All 300 tools loaded (75,000 tokens) | 📖 20 polymorphic tools (2,000 tokens) |
+| ❌ 37.5% of budget wasted at startup | ✅ 99% of budget available for work |
+| 🤦 "Which servers do I need today?" | 🎉 "What do you need help with?" |
 
 ---
 
-## 📚 Project Origin Story
+## 🏗️ How It Works: The DeepLake Example
 
-**How this project was born:**
+**Traditional**: Your `deeplake-rag` server has 6 tools (retrieve_context, get_summary, search_document_content, get_document, get_fuzzy_matching_titles, list_documents) = **2,400 tokens** at startup.
 
-I didn't notice my Claude Code sessions were consuming more and more tokens at first. But gradually, I noticed something was wrong - my sessions needed more and more token usage, and the context window was filling up super quick. I'd start a simple coding task and already be at 50% of my token budget before writing a single line of code!
+**MCP Librarian**: Claude sees 1 polymorphic tool = **100 tokens**.
 
-After analyzing my system prompts, I discovered **66,000+ tokens were being consumed before my conversation even started** - just from MCP server tool schemas. With 80+ MCP servers in my setup, I was hitting 240,000 tokens at startup, exceeding my 200,000 token budget before I could even ask a question.
+### The Transformation
 
-This project was born as a way to be more efficient with token usage around coding CLI tools. The library metaphor came naturally - instead of dumping all the books on your desk, a smart librarian checks out exactly what you need, when you need it.
-
-**Current status**: Working with Claude Code
-**Roadmap**: See [ROADMAP.md](ROADMAP.md) for expansion to Gemini Codex, Blocks, Goose CLI, OpenCode, and others
-
----
-
-## 📖 The Library Metaphor
-
-| Traditional MCP | MCP Librarian |
-|----------------|---------------|
-| Dump all books on desk | Librarian fetches books on-demand |
-| All tools loaded at startup | Tools loaded when needed |
-| 240,000 tokens wasted | 8,000 tokens used |
-| Can't even start session | 192,000 tokens available |
-| "What tools do I have?" | "What do you need help with?" |
-| Front-loading waste | Lazy loading efficiency |
-
----
-
-## 🏗️ How The Library Works
-
-### 1. **The Catalog** (Registry)
+**Registry (Catalog)**:
 ```json
 {
-  "servers": {
-    "deeplake-rag": {
-      "friendly_name": "Research Database",
-      "dewey_decimal": "rag.research.deeplake",
-      "triggers": ["research", "articles", "saved"],
-      "location": "docker-configs/deeplake-rag/"
-    }
+  "deeplake-rag": {
+    "triggers": ["research", "articles", "saved"],
+    "location": "docker-configs/deeplake-rag/"
   }
 }
 ```
 
-Like a library catalog - the librarian knows where every book is, but doesn't put them all on your desk.
-
-### 2. **The Checkout Desk** (Polymorphic Tool)
-```
-User: "Search my research articles for reverse prompting"
-       ↓
-Librarian Tool: deeplake_query("search articles for reverse prompting")
-       ↓
-Librarian: "Let me check that section for you..."
-       ↓
-Docker Container: *starts on-demand* (like fetching from stacks)
-       ↓
-Real Tools: retrieve_context(query="reverse prompting")
-       ↓
-Results: "Here's what I found in your research collection!"
+**Polymorphic Tool (What Claude Sees)**:
+```json
+{
+  "name": "deeplake_query",
+  "description": "Search your knowledge base using natural language",
+  "inputSchema": { "query": "string" }
+}
 ```
 
-### 3. **The Return Policy** (Auto-Stop)
+### The Workflow
+
 ```
-Book checked out → Used for 5 minutes → Automatically returned to shelf
-Tool container started → Used → Auto-stopped after 5 min idle
+You: "Search for articles about Docker"
+  ↓
+Librarian: Starts container → Routes to retrieve_context → Returns results
+  ↓
+5 min idle → Container auto-stops
 ```
 
-No more keeping 80 books on your desk "just in case" - the librarian returns them automatically!
+**Result**: 96% token savings. Seamless experience. Zero manual management.
 
 ---
 
-## 🎓 The Research Behind This
-
-### Anthropic's Findings: Front-Loading is Broken
-
-From [Anthropic's Advanced Tool Use Engineering Blog](https://www.anthropic.com/engineering/advanced-tool-use):
-
-> **"85% reduction in token usage while maintaining access to your full tool library"**
-
-**The Problem They Identified:**
-- Traditional systems front-load ALL tool definitions
-- Most tools never used in a session
-- Context window wasted on irrelevant schemas
-
-**Their Solution (Tool Search Tool):**
-- Discovers tools on-demand
-- Claude only sees tools it needs for current task
-- Massive token savings
-
-**MCP Librarian implements this exact pattern!**
-
-### Cloudflare/Speakeasy's Data: Schemas Are The Problem
-
-From [Speakeasy's 100x Token Reduction Article](https://www.speakeasy.com/blog/how-we-reduced-token-usage-by-100x-dynamic-toolsets-v2):
-
-> **"Schemas represent 60-80% of token usage in static toolsets"**
-
-**Their Findings:**
-```
-Traditional Setup:
-  - Tool calls: 100%
-  - Input tokens: 100%
-  - Problem: Schemas loaded for ALL tools
-
-Dynamic Toolset (Lazy Loading):
-  - Tool calls: 200% (2x more)
-  - Input tokens: 4% (96% reduction!)
-  - Solution: Load schemas only when needed
-```
-
-**Despite 2x more tool calls, input tokens dropped by 96%!**
-
-**MCP Librarian uses the same lazy schema loading pattern.**
-
-### Real-World Evidence: Scott Spence's Optimization Journey
-
-From [Scott Spence's MCP Optimization Guide](https://scottspence.com/posts/optimising-mcp-server-context-usage-in-claude-code):
-
-**Before Optimization:**
-- 7 MCP servers
-- 67,300 tokens consumed
-- 33.7% of 200k context budget GONE before conversation starts
-
-**After Optimization:**
-- Disabled unused servers
-- 8,551 tokens saved
-- More context available for work
-
-**MCP Librarian automates this optimization for 80+ servers!**
-
----
-
-## 🚀 Quick Start: Set Up Your Library
-
-### Installation (2 minutes)
+## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/yourusername/mcp-librarian.git
-cd mcp-librarian
-pip install -e .
+git clone https://github.com/gyasis/mcplibrarian.git
+cd mcplibrarian
+python mcp-librarian.py ~/path/to/your/mcp-server/
 ```
 
 ### Catalog Your First Book (5 minutes)
@@ -440,48 +331,72 @@ python mcp-librarian.py ~/mcp-server/
 
 ## 🌟 What Makes This Different
 
-### vs Traditional MCP (Dump Truck Approach)
-- ❌ Traditional: All tools loaded at startup
-- ✅ MCP Librarian: Tools loaded on-demand
+### vs Manual Enable/Disable (The Tedious Way)
+- ❌ Manual: Open settings → disable 17 servers → restart → work → realize you need a server → re-enable → restart AGAIN → lose context
+- ✅ MCP Librarian: Just work. Tools load automatically. Never restart.
+- ❌ Manual: 5-10 min per configuration change
+- ✅ MCP Librarian: Instant, seamless
 
-### vs lazy-mcp (Basic Lazy Loading)
+### vs Traditional MCP (Front-Load Everything)
+- ❌ Traditional: Load all 300 tools = 75,000 tokens wasted
+- ✅ MCP Librarian: Load 20 polymorphic tools = 2,000 tokens used
+- ❌ Traditional: 37.5% of budget gone at startup
+- ✅ MCP Librarian: 99% of budget available for work
+
+### vs lazy-mcp (Manual Config)
+- ❌ lazy-mcp: Still requires manual enable/disable per session
+- ✅ MCP Librarian: Fully automatic, no manual intervention
 - ❌ lazy-mcp: 17-34k token savings (manual config)
-- ✅ MCP Librarian: 232k token savings (90% automated)
+- ✅ MCP Librarian: 73k token savings (90% automated)
 
 ### vs token-optimizer-mcp (Cache Optimization)
-- ❌ token-optimizer: Optimizes after loading (still front-loads)
-- ✅ MCP Librarian: Never loads unused tools
+- ❌ token-optimizer: Optimizes after loading (still front-loads all tools)
+- ✅ MCP Librarian: Never loads unused tools (true lazy loading)
 
 ### vs Anthropic's Tool Search Tool (Built-in)
 - ❌ Tool Search: Requires compatible MCP servers
-- ✅ MCP Librarian: Works with ANY MCP server via Docker
+- ✅ MCP Librarian: Works with ANY MCP server via Docker wrapper
 
-**MCP Librarian = Tool Search Tool pattern + Docker + Automation**
+**MCP Librarian = Zero manual management + True lazy loading + 97.3% token savings**
 
 ---
 
-## 💰 Cost Savings Calculator
+## 💰 The Real Cost Savings
 
-### Token Costs (at $3 per million input tokens)
+### Token Savings: 97.3% Reduction
 
-| Sessions | Traditional Cost | MCP Librarian Cost | Savings |
-|----------|-----------------|-------------------|---------|
-| 100 | $72.00 | $2.40 | $69.60 (97%) |
-| 1,000 | $720.00 | $24.00 | $696.00 (97%) |
-| 10,000 | $7,200.00 | $240.00 | $6,960.00 (97%) |
+With **20 MCP servers** and **300 tools**, you're looking at:
+- **Traditional approach**: 75,000 tokens wasted at every session start
+- **MCP Librarian**: 2,000 tokens (just the polymorphic tools)
+- **Savings**: 73,000 tokens per session
 
-### Developer Time Costs (at $100/hour)
+That's 97.3% of your context window back for actual work instead of tool schemas you'll never use.
 
-| Servers | Manual Setup | MCP Librarian | Savings |
-|---------|-------------|---------------|---------|
-| 1 | $250 (2.5hr) | $12.50 (7.5min) | $237.50 (95%) |
-| 10 | $2,500 | $125 | $2,375 (95%) |
-| 80 | $20,000 | $1,000 | $19,000 (95%) |
+### Time Savings: Stop The Manual Management Grind
 
-**Total Savings** (80 servers, 1,000 sessions):
-- Token savings: $6,960
-- Time savings: $19,000
-- **Total: $25,960** 🎉
+**The old way** (manual enable/disable):
+- 5-10 minutes every time you need to change which servers are enabled
+- 5-10 times per day on average
+- **30-100 minutes wasted daily** just managing your tools
+- Lost context every time you restart
+- Frustration and broken flow state
+
+**With MCP Librarian**:
+- Zero manual management
+- Never restart Claude Code
+- Never lose context
+- Just ask for what you need - the librarian handles everything
+
+### Setup Time: 90% Automation
+
+**Manual dockerization** of 20 servers:
+- ~2.5 hours per server × 20 = **50 hours of tedious work**
+
+**MCP Librarian automation**:
+- ~9 minutes per server × 20 = **3 hours total**
+- 94% time savings on setup
+
+**The bottom line**: More time coding, less time managing infrastructure. That's what MCP Librarian is all about.
 
 ---
 
@@ -494,6 +409,10 @@ python mcp-librarian.py ~/mcp-server/
 ### Detailed Guides
 - [**AUTOMATED_CATALOGING.md**](docs/MCP_DOCKERIZE_GUIDE.md) - Automated cataloging (15 pages)
 - [**MANUAL_CATALOGING.md**](docs/MANUAL_DOCKERIZATION_GUIDE.md) - Manual cataloging (25 pages)
+- [**PLAYWRIGHT_TUTORIAL.md**](docs/PLAYWRIGHT_TUTORIAL.md) - Step-by-step Playwright example with troubleshooting
+
+### Examples
+- [**playwright/**](examples/playwright/) - Complete Playwright cataloging example with all files
 
 ### Community
 - [**CONTRIBUTING.md**](CONTRIBUTING.md) - Help expand the library
