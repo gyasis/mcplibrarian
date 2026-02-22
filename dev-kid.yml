@@ -1,0 +1,28 @@
+sentinel:
+  enabled: true
+  mode: auto
+
+  # per-wave = one sentinel after each wave (faster); per-task = maximum coverage
+  injection_granularity: per-wave
+  injection_n: 3
+
+  tier1:
+    model: qwen3-coder:30b
+    ollama_url: http://192.168.0.159:11434
+    max_iterations: 5
+
+  tier2:
+    model: claude-sonnet-4-6
+    max_iterations: 10
+    max_budget_usd: 2.0
+    max_duration_min: 10
+
+  change_radius:
+    max_files: 3
+    max_lines: 150
+    allow_interface_changes: false
+
+  placeholder:
+    fail_on_detect: true
+    patterns: []
+    exclude_paths: []

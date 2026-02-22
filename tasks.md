@@ -15,10 +15,10 @@
 
 **Purpose**: Create directory structure, install new dependency, and seed fixture servers used throughout all stories.
 
-- [x] T001 Create `tests/` directory structure: `tests/__init__.py`, `tests/unit/`, `tests/integration/`, `tests/fixtures/sample-python-server/`, `tests/fixtures/sample-node-server/`
-- [x] T002 Add `pyyaml>=6.0` to `pyproject.toml` dependencies and run `uv sync` to update `uv.lock`
-- [x] T003 [P] Create minimal Node.js fixture server — `tests/fixtures/sample-node-server/package.json` (with `@modelcontextprotocol/sdk` dep, `"main": "index.js"`) and `tests/fixtures/sample-node-server/index.js` (stub MCP server that responds to `initialize` and `tools/list`)
-- [x] T004 [P] Create minimal Python fixture server — `tests/fixtures/sample-python-server/pyproject.toml` (FastMCP dep, Python 3.10) and `tests/fixtures/sample-python-server/server.py` (stub FastMCP server)
+- [ ] T001 Create `tests/` directory structure: `tests/__init__.py`, `tests/unit/`, `tests/integration/`, `tests/fixtures/sample-python-server/`, `tests/fixtures/sample-node-server/`
+- [ ] T002 Add `pyyaml>=6.0` to `pyproject.toml` dependencies and run `uv sync` to update `uv.lock`
+- [ ] T003 [P] Create minimal Node.js fixture server — `tests/fixtures/sample-node-server/package.json` (with `@modelcontextprotocol/sdk` dep, `"main": "index.js"`) and `tests/fixtures/sample-node-server/index.js` (stub MCP server that responds to `initialize` and `tools/list`)
+- [ ] T004 [P] Create minimal Python fixture server — `tests/fixtures/sample-python-server/pyproject.toml` (FastMCP dep, Python 3.10) and `tests/fixtures/sample-python-server/server.py` (stub FastMCP server)
 
 ---
 
@@ -148,7 +148,7 @@
 **Purpose**: Tie up loose ends that affect multiple stories.
 
 - [ ] T051 [P] Fix `src/mcp_dockerize/generators/dockerfile.py` to use Jinja2 templates (T006–T009) via `jinja2.Environment(loader=FileSystemLoader(templates_dir))` instead of the existing hardcoded string generation — resolves the known `FileNotFoundError` blocker documented in `memory-bank/techContext.md`
-- [x] T052 [P] Add `~/.config/mcp-librarian/` to `.gitignore` and verify `docker-configs/` is already excluded; confirm `tests/fixtures/sample-node-server/package-lock.json` is git-ignored (auto-generated during tests)
+- [ ] T052 [P] Add `~/.config/mcp-librarian/` to `.gitignore` and verify `docker-configs/` is already excluded; confirm `tests/fixtures/sample-node-server/package-lock.json` is git-ignored (auto-generated during tests)
 - [ ] T053 Update `README.md` with full CLI reference — commands table (wrap, wrap-all, list, status, health, remove, scan), platform support table (6 platforms with config paths), Option B shell wrapper usage, quickstart example from fixture servers
 - [ ] T054 Run `quickstart.md` validation end-to-end — execute every command block in `specs/001-mcp-librarian/quickstart.md`; fix any commands that fail; update quickstart if paths or flags changed during implementation
 
@@ -279,3 +279,19 @@ With two developers:
 - `--dry-run` on `wrap` lets you validate without making changes — use it first on real servers
 - Never modify `tests/fixtures/` contents during implementation; they are controlled test inputs
 - `docker compose` (no hyphen) throughout — Docker v2 plugin syntax enforced
+
+- [ ] SENTINEL-W1: Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054): verify all implementations pass tests
+- [ ] SENTINEL-W2: Sentinel validation for wave 2 (T008, T025, T027, T039, T040): verify all implementations pass tests
+- [ ] SENTINEL-W3: Sentinel validation for wave 3 (T009, T026, T042): verify all implementations pass tests
+- [ ] SENTINEL-W4: Sentinel validation for wave 4 (T019, T028): verify all implementations pass tests
+- [ ] SENTINEL-W5: Sentinel validation for wave 5 (T029, T047): verify all implementations pass tests
+- [ ] SENTINEL-W6: Sentinel validation for wave 6 (T030, T048, T050): verify all implementations pass tests
+- [ ] SENTINEL-W7: Sentinel validation for wave 7 (T037, T049): verify all implementations pass tests
+- [ ] SENTINEL-W8: Sentinel validation for wave 8 (T038): verify all implementations pass tests
+- [ ] SENTINEL-W9: Sentinel validation for wave 9 (T041): verify all implementations pass tests
+- [ ] SENTINEL-W10: Sentinel validation for wave 10 (T043): verify all implementations pass tests
+- [ ] SENTINEL-W11: Sentinel validation for wave 11 (T044): verify all implementations pass tests
+- [ ] SENTINEL-W12: Sentinel validation for wave 12 (T045): verify all implementations pass tests
+- [ ] SENTINEL-W13: Sentinel validation for wave 13 (T046): verify all implementations pass tests
+
+- [ ] SENTINEL-W1: Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067): verify all implementations pass tests
