@@ -155,7 +155,7 @@ services:
         env_example = "# Environment variables for MCP server\n"
         env_example += "# Copy this to .env and fill in your values\n\n"
 
-        for key in metadata.env_vars.keys():
+        for key in metadata.env_vars:  # env_vars is List[str] of var names
             # Mask sensitive values
             if any(secret in key.lower() for secret in ["key", "secret", "password", "token"]):
                 env_example += f"{key}=<YOUR_{key}_HERE>\n"
@@ -239,7 +239,7 @@ echo '{{"jsonrpc":"2.0","method":"initialize","params":{{}}}}' | docker compose 
 Copy `.env.example` to `.env` and configure:
 
 """
-            for key in metadata.env_vars.keys():
+            for key in metadata.env_vars:  # env_vars is List[str] of var names
                 readme += f"- `{key}`\n"
 
         # Add security warnings

@@ -295,3 +295,7 @@ With two developers:
 - [ ] SENTINEL-W13: Sentinel validation for wave 13 (T046): verify all implementations pass tests
 
 - [ ] SENTINEL-W1: Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067): verify all implementations pass tests
+
+- [ ] SENTINEL-W1: Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067, T068): verify all implementations pass tests
+
+- [ ] SENTINEL-W1: Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067, T068, T069): verify all implementations pass tests

@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-mcplibrarian = "mcp_dockerize.cli:main"
+mcplibrarian = "mcp_dockerize.cli:cli"
 
 [build-system]
 requires = ["hatchling"]

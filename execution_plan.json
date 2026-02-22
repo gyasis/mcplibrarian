@@ -5,7 +5,7 @@
       {
         "wave_id": 1,
         "strategy": "PARALLEL_SWARM",
-        "rationale": "Wave 1: 44 independent task(s) with no file conflicts",
+        "rationale": "Wave 1: 46 independent task(s) with no file conflicts",
         "tasks": [
           {
             "task_id": "T001",
@@ -23,8 +23,8 @@
             "agent_role": "Developer",
             "instruction": "T002 Add `pyyaml>=6.0` to `pyproject.toml` dependencies and run `uv sync` to update `uv.lock`",
             "file_locks": [
-              "uv.lock",
-              "pyproject.toml"
+              "pyproject.toml",
+              "uv.lock"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T002 Add `pyyaml>=6.0` to `pyproject.toml` dependencies and run `uv sync` to update `uv.lock`' to [x]",
@@ -35,9 +35,9 @@
             "agent_role": "Developer",
             "instruction": "T003 [P] Create minimal Node.js fixture server \u2014 `tests/fixtures/sample-node-server/package.json` (with `@modelcontextprotocol/sdk` dep, `\"main\": \"index.js\"`) and `tests/fixtures/sample-node-server/index.js` (stub MCP server that responds to `initialize` and `tools/list`)",
             "file_locks": [
-              "index.js",
               "tests/fixtures/sample-node-server/index.js",
               "tests/fixtures/sample-node-server/package.json",
+              "index.js",
               "Node.js"
             ],
             "constitution_rules": [],
@@ -136,10 +136,10 @@
             "agent_role": "Developer",
             "instruction": "T014 Create registry store in `src/mcp_dockerize/registry/store.py` \u2014 `RegistryStore` class with methods: `load() -> dict`, `save(data)` (atomic write via `.tmp` + `os.replace`), `add(entry: RegistryEntry)`, `get(name: str) -> RegistryEntry | None`, `list_all() -> list[RegistryEntry]`, `remove(name: str)`, `update_health(name, result: HealthCheckResult)`; stores at `~/.config/mcp-librarian/registry.json`; creates parent dirs on first write",
             "file_locks": [
+              "src/mcp_dockerize/registry/store.py",
               "os.replace",
-              "config/mcp-librarian/registry.json",
               "~/.config/mcp-librarian/registry.json",
-              "src/mcp_dockerize/registry/store.py"
+              "config/mcp-librarian/registry.json"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T014 Create registry store in `src/mcp_dockerize/registry/store.py` \u2014 `RegistryStore` class with methods: `load() -> dict`, `save(data)` (atomic write via `.tmp` + `os.replace`), `add(entry: RegistryEntry)`, `get(name: str) -> RegistryEntry | None`, `list_all() -> list[RegistryEntry]`, `remove(name: str)`, `update_health(name, result: HealthCheckResult)`; stores at `~/.config/mcp-librarian/registry.json`; creates parent dirs on first write' to [x]",
@@ -227,8 +227,8 @@
             "agent_role": "Developer",
             "instruction": "T023 [US1] Implement docker-compose.yml generator in `src/mcp_dockerize/generators/compose.py` \u2014 `ComposeGenerator(metadata, config_dir).generate() -> Path`; renders `docker-compose.yml.j2` with service name, build context, volumes (using `type: bind` with absolute paths, `read_only: true`), `env_file: [.env]`, `stdin_open: true`, `tty: false`; creates `config_dir` if needed; copies `.env.example` rendered from `env-example.j2`",
             "file_locks": [
-              "docker-compose.yml",
               "src/mcp_dockerize/generators/compose.py",
+              "docker-compose.yml",
               ".env.example"
             ],
             "constitution_rules": [],
@@ -240,8 +240,8 @@
             "agent_role": "Developer",
             "instruction": "T024 [US1] Implement `ClaudeCodePlatform` in `src/mcp_dockerize/platforms/claude_code.py` \u2014 extends `AbstractPlatform`; `config_path` = `~/.config/Claude/claude_desktop_config.json`; `add_server`: read JSON \u2192 validate \u2192 merge entry under `mcpServers.<name>` with `{\"command\": \"docker\", \"args\": [\"compose\", \"-f\", \"<abs_compose_path>\", \"run\", \"--rm\", \"<name>\"]}` \u2192 write atomically; `remove_server`: pop key from `mcpServers`; back up to `.bak` before any write",
             "file_locks": [
-              "src/mcp_dockerize/platforms/claude_code.py",
               "~/.config/Claude/claude_desktop_config.json",
+              "src/mcp_dockerize/platforms/claude_code.py",
               "config/Claude/claude_desktop_config.json"
             ],
             "constitution_rules": [],
@@ -253,9 +253,9 @@
             "agent_role": "Developer",
             "instruction": "T031 [P] [US3] Implement `CursorPlatform` in `src/mcp_dockerize/platforms/cursor.py` \u2014 extends `AbstractPlatform`; `config_path` = `~/.cursor/mcp.json`; entry format: `mcpServers.<name>` with `command`/`args` (same as Claude Code); create file with `{\"mcpServers\": {}}` if missing",
             "file_locks": [
+              "~/.cursor/mcp.json",
               "cursor/mcp.json",
-              "src/mcp_dockerize/platforms/cursor.py",
-              "~/.cursor/mcp.json"
+              "src/mcp_dockerize/platforms/cursor.py"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T031 [P] [US3] Implement `CursorPlatform` in `src/mcp_dockerize/platforms/cursor.py` \u2014 extends `AbstractPlatform`; `config_path` = `~/.cursor/mcp.json`; entry format: `mcpServers.<name>` with `command`/`args` (same as Claude Code); create file with `{\"mcpServers\": {}}` if missing' to [x]",
@@ -266,9 +266,9 @@
             "agent_role": "Developer",
             "instruction": "T032 [P] [US3] Implement `VSCodePlatform` in `src/mcp_dockerize/platforms/vscode.py` \u2014 extends `AbstractPlatform`; `config_path` = `~/.config/Code/User/settings.json`; nested key path: `mcp.servers.<name>` with `type: \"stdio\"`, `command`, `args`; must deep-merge without clobbering other VS Code settings",
             "file_locks": [
-              "~/.config/Code/User/settings.json",
               "src/mcp_dockerize/platforms/vscode.py",
-              "config/Code/User/settings.json"
+              "config/Code/User/settings.json",
+              "~/.config/Code/User/settings.json"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T032 [P] [US3] Implement `VSCodePlatform` in `src/mcp_dockerize/platforms/vscode.py` \u2014 extends `AbstractPlatform`; `config_path` = `~/.config/Code/User/settings.json`; nested key path: `mcp.servers.<name>` with `type: \"stdio\"`, `command`, `args`; must deep-merge without clobbering other VS Code settings' to [x]",
@@ -279,9 +279,9 @@
             "agent_role": "Developer",
             "instruction": "T033 [P] [US3] Implement `GoosePlatform` in `src/mcp_dockerize/platforms/goose.py` \u2014 extends `AbstractPlatform` with YAML override; `config_path` = `~/.config/goose/config.yaml`; uses `yaml.safe_load` / `yaml.safe_dump`; entry appended to `extensions` list as `{name, type: \"stdio\", cmd: \"docker\", args: [...], description, enabled: true}`; no duplicate names (check before append)",
             "file_locks": [
+              "src/mcp_dockerize/platforms/goose.py",
               "config/goose/config.yaml",
-              "~/.config/goose/config.yaml",
-              "src/mcp_dockerize/platforms/goose.py"
+              "~/.config/goose/config.yaml"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T033 [P] [US3] Implement `GoosePlatform` in `src/mcp_dockerize/platforms/goose.py` \u2014 extends `AbstractPlatform` with YAML override; `config_path` = `~/.config/goose/config.yaml`; uses `yaml.safe_load` / `yaml.safe_dump`; entry appended to `extensions` list as `{name, type: \"stdio\", cmd: \"docker\", args: [...], description, enabled: true}`; no duplicate names (check before append)' to [x]",
@@ -292,9 +292,9 @@
             "agent_role": "Developer",
             "instruction": "T034 [P] [US3] Implement `CodexPlatform` in `src/mcp_dockerize/platforms/codex.py` \u2014 extends `AbstractPlatform` with YAML override; `config_path` = `~/.codex/config.yaml`; generates a shell wrapper script at `~/.codex/tools/<name>.sh` (executable, `#!/bin/bash`, `docker compose -f ... run --rm <name>`); adds entry to `tools` list in config YAML as `{name, type: \"shell\", script: \"~/.codex/tools/<name>.sh\", description}`; `chmod +x` the wrapper",
             "file_locks": [
-              "~/.codex/tools/<name>.sh",
-              "src/mcp_dockerize/platforms/codex.py",
               "codex/config.yaml",
+              "src/mcp_dockerize/platforms/codex.py",
+              "~/.codex/tools/<name>.sh",
               "~/.codex/config.yaml"
             ],
             "constitution_rules": [],
@@ -307,8 +307,8 @@
             "instruction": "T035 [P] [US3] Implement `OpenCodePlatform` in `src/mcp_dockerize/platforms/opencode.py` \u2014 extends `AbstractPlatform`; `config_path` = `~/.config/opencode/config.json`; entry format: `mcpServers.<name>` with `command`/`args`; create file with `{\"mcpServers\": {}}` if missing",
             "file_locks": [
               "config/opencode/config.json",
-              "~/.config/opencode/config.json",
-              "src/mcp_dockerize/platforms/opencode.py"
+              "src/mcp_dockerize/platforms/opencode.py",
+              "~/.config/opencode/config.json"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T035 [P] [US3] Implement `OpenCodePlatform` in `src/mcp_dockerize/platforms/opencode.py` \u2014 extends `AbstractPlatform`; `config_path` = `~/.config/opencode/config.json`; entry format: `mcpServers.<name>` with `command`/`args`; create file with `{\"mcpServers\": {}}` if missing' to [x]",
@@ -330,8 +330,8 @@
             "agent_role": "Developer",
             "instruction": "T051 [P] Fix `src/mcp_dockerize/generators/dockerfile.py` to use Jinja2 templates (T006\u2013T009) via `jinja2.Environment(loader=FileSystemLoader(templates_dir))` instead of the existing hardcoded string generation \u2014 resolves the known `FileNotFoundError` blocker documented in `memory-bank/techContext.md`",
             "file_locks": [
-              "src/mcp_dockerize/generators/dockerfile.py",
-              "memory-bank/techContext.md"
+              "memory-bank/techContext.md",
+              "src/mcp_dockerize/generators/dockerfile.py"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T051 [P] Fix `src/mcp_dockerize/generators/dockerfile.py` to use Jinja2 templates (T006\u2013T009) via `jinja2.Environment(loader=FileSystemLoader(templates_dir))` instead of the existing hardcoded string generation \u2014 resolves the known `FileNotFoundError` blocker documented in `memory-bank/techContext.md`' to [x]",
@@ -489,12 +489,30 @@
             "dependencies": []
           },
           {
-            "task_id": "SENTINEL-W1",
-            "agent_role": "Sentinel",
-            "instruction": "Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067): verify all implementations pass tests",
+            "task_id": "T068",
+            "agent_role": "Developer",
+            "instruction": "SENTINEL-W1: Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067): verify all implementations pass tests",
             "file_locks": [],
             "constitution_rules": [],
-            "completion_handshake": "Upon success, update tasks.md line containing 'Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067): verify all implementations pass tests' to [x]",
+            "completion_handshake": "Upon success, update tasks.md line containing 'SENTINEL-W1: Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067): verify all implementations pass tests' to [x]",
+            "dependencies": []
+          },
+          {
+            "task_id": "T069",
+            "agent_role": "Developer",
+            "instruction": "SENTINEL-W1: Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067, T068): verify all implementations pass tests",
+            "file_locks": [],
+            "constitution_rules": [],
+            "completion_handshake": "Upon success, update tasks.md line containing 'SENTINEL-W1: Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067, T068): verify all implementations pass tests' to [x]",
+            "dependencies": []
+          },
+          {
+            "task_id": "SENTINEL-W1",
+            "agent_role": "Sentinel",
+            "instruction": "Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067, T068, T069): verify all implementations pass tests",
+            "file_locks": [],
+            "constitution_rules": [],
+            "completion_handshake": "Upon success, update tasks.md line containing 'Sentinel validation for wave 1 (T001, T002, T003, T004, T005, T006, T007, T010, T011, T012, T013, T014, T015, T016, T017, T018, T020, T021, T022, T023, T024, T031, T032, T033, T034, T035, T036, T051, T052, T053, T054, T055, T056, T057, T058, T059, T060, T061, T062, T063, T064, T065, T066, T067, T068, T069): verify all implementations pass tests' to [x]",
             "dependencies": [
               "T001",
               "T002",
@@ -539,9 +557,11 @@
               "T064",
               "T065",
               "T066",
-              "T067"
+              "T067",
+              "T068",
+              "T069"
             ],
-            "parent_task_id": "T067"
+            "parent_task_id": "T069"
           }
         ],
         "checkpoint_after": {
@@ -575,8 +595,8 @@
             "instruction": "T025 [US1] Implement `wrap` Click subcommand in `src/mcp_dockerize/cli.py` \u2014 args: `SERVER_PATH`; options: `--name`, `--platform` (default `claude_code`), `--no-health-check`, `--no-register`, `--force`, `--verbose`, `--dry-run`; orchestration: (1) SmartScan, (2) AutoFixer, (3) `DockerfileGenerator` + `ComposeGenerator`, (4) `DockerBuilder.build_image`, (5) `MCPHealthChecker.check`, (6) `RegistryStore.add`, (7) platform `add_server`; each step prints `[StepName]` prefix line; exit codes per contract",
             "file_locks": [
               "src/mcp_dockerize/cli.py",
-              "RegistryStore.add",
-              "MCPHealthChecker.check"
+              "MCPHealthChecker.check",
+              "RegistryStore.add"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T025 [US1] Implement `wrap` Click subcommand in `src/mcp_dockerize/cli.py` \u2014 args: `SERVER_PATH`; options: `--name`, `--platform` (default `claude_code`), `--no-health-check`, `--no-register`, `--force`, `--verbose`, `--dry-run`; orchestration: (1) SmartScan, (2) AutoFixer, (3) `DockerfileGenerator` + `ComposeGenerator`, (4) `DockerBuilder.build_image`, (5) `MCPHealthChecker.check`, (6) `RegistryStore.add`, (7) platform `add_server`; each step prints `[StepName]` prefix line; exit codes per contract' to [x]",
@@ -602,9 +622,9 @@
             "agent_role": "Developer",
             "instruction": "T039 [US4] Implement health history storage in `src/mcp_dockerize/registry/store.py` \u2014 add `update_health(name, result: HealthCheckResult)` method: append result to `registry.json` under `servers[name].health_history` (keep last 168 entries \u2014 7 days at hourly rate); update `servers[name].health` summary (last check only); prune entries older than 7 days",
             "file_locks": [
-              "servers[name].health",
+              "src/mcp_dockerize/registry/store.py",
               "registry.json",
-              "src/mcp_dockerize/registry/store.py"
+              "servers[name].health"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T039 [US4] Implement health history storage in `src/mcp_dockerize/registry/store.py` \u2014 add `update_health(name, result: HealthCheckResult)` method: append result to `registry.json` under `servers[name].health_history` (keep last 168 entries \u2014 7 days at hourly rate); update `servers[name].health` summary (last check only); prune entries older than 7 days' to [x]",
@@ -682,8 +702,8 @@
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T026 [US1] Add human-readable error wrapping to `wrap` in `src/mcp_dockerize/cli.py` \u2014 catch `DockerBuildError`, `MCPTestError`, and all custom exceptions; format as `[ERROR] <summary>\\n  \u2192 <instruction>`; never print raw tracebacks unless `--verbose`; implement `--dry-run` path that prints would-do steps and exits 0' to [x]",
             "dependencies": [
-              "T005",
-              "T025"
+              "T025",
+              "T005"
             ]
           },
           {
@@ -691,14 +711,14 @@
             "agent_role": "Developer",
             "instruction": "T042 [US4] Add `source_missing` detection to `MCPHealthChecker` in `src/mcp_dockerize/health/checker.py` \u2014 before running L1, check if `entry.source_path` still exists on disk; if not, return `HealthStatus.STOPPED` with `error_message=\"Source directory not found: <path>\"`; update registry entry `status` to `source_missing`",
             "file_locks": [
-              "src/mcp_dockerize/health/checker.py",
-              "HealthStatus.STOPPED"
+              "HealthStatus.STOPPED",
+              "src/mcp_dockerize/health/checker.py"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T042 [US4] Add `source_missing` detection to `MCPHealthChecker` in `src/mcp_dockerize/health/checker.py` \u2014 before running L1, check if `entry.source_path` still exists on disk; if not, return `HealthStatus.STOPPED` with `error_message=\"Source directory not found: <path>\"`; update registry entry `status` to `source_missing`' to [x]",
             "dependencies": [
-              "T040",
-              "T018"
+              "T018",
+              "T040"
             ]
           },
           {
@@ -706,8 +726,8 @@
             "agent_role": "Sentinel",
             "instruction": "Sentinel validation for wave 3 (T009, T026, T042): verify all implementations pass tests",
             "file_locks": [
-              "src/mcp_dockerize/health/checker.py",
-              "HealthStatus.STOPPED"
+              "HealthStatus.STOPPED",
+              "src/mcp_dockerize/health/checker.py"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'Sentinel validation for wave 3 (T009, T026, T042): verify all implementations pass tests' to [x]",
@@ -736,10 +756,10 @@
             "agent_role": "Developer",
             "instruction": "T019 [P] [US1] Implement `NodeDetector` in `src/mcp_dockerize/detectors/node.py` \u2014 `can_detect`: check `package.json` exists and `@modelcontextprotocol/sdk` or `@modelcontextprotocol/server` in `dependencies`/`devDependencies`; `detect`: extract `name`, `version`, `main`/`bin` entry point, `engines.node` (or `.nvmrc`/`.node-version`, default `\"20\"`), `dependencies` keys, `process.env.VAR` patterns in entry point file, `has_package_lock` bool",
             "file_locks": [
+              "package.json",
               "src/mcp_dockerize/detectors/node.py",
               "engines.node",
-              "process.env.VAR",
-              "package.json"
+              "process.env.VAR"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T019 [P] [US1] Implement `NodeDetector` in `src/mcp_dockerize/detectors/node.py` \u2014 `can_detect`: check `package.json` exists and `@modelcontextprotocol/sdk` or `@modelcontextprotocol/server` in `dependencies`/`devDependencies`; `detect`: extract `name`, `version`, `main`/`bin` entry point, `engines.node` (or `.nvmrc`/`.node-version`, default `\"20\"`), `dependencies` keys, `process.env.VAR` patterns in entry point file, `has_package_lock` bool' to [x]",
@@ -757,9 +777,9 @@
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T028 [US2] Implement `wrap-all` Click subcommand in `src/mcp_dockerize/cli.py` \u2014 args: `SCAN_DIR`; options: `--workers` (default 4, max 8), `--platform` (repeatable), `--skip-existing` (default True), `--force`, `--filter` (glob), `--yes`; use `concurrent.futures.ThreadPoolExecutor(max_workers)` to call the same wrap logic as the `wrap` command for each discovered server' to [x]",
             "dependencies": [
-              "T026",
+              "T025",
               "T005",
-              "T025"
+              "T026"
             ]
           },
           {
@@ -800,10 +820,10 @@
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T029 [US2] Add live per-server progress display to `wrap-all` in `src/mcp_dockerize/cli.py` \u2014 print one status line per server updated in place (use `\\r` overwrite or line-buffered output); show server name + current step (scanning / building / health check / done / failed)' to [x]",
             "dependencies": [
-              "T026",
-              "T005",
+              "T028",
               "T025",
-              "T028"
+              "T005",
+              "T026"
             ]
           },
           {
@@ -811,22 +831,22 @@
             "agent_role": "Developer",
             "instruction": "T047 Implement `wrap-mcp.sh` at repo root \u2014 phases: (1) call `uv run mcplibrarian scan` or fall back to pure shell detection of `package.json` / `pyproject.toml`; (2) generate `package-lock.json` if missing using `docker run node:<ver>-slim npm install --package-lock-only`; (3) call `uv run mcplibrarian` (existing generator) to produce Dockerfile + docker-compose.yml in `docker-configs/<name>/`; (4) run `docker compose build`; (5) update `~/.config/Claude/claude_desktop_config.json` via jq merge; accept `[PLATFORM]` arg defaulting to `claude_code`; color-coded `[Step]` output matching CLI convention; exit codes 0/1/2/3",
             "file_locks": [
-              "docker-compose.yml",
-              "package-lock.json",
-              "wrap-mcp.sh",
               "pyproject.toml",
+              "docker-compose.yml",
+              "config/Claude/claude_desktop_config.json",
+              "wrap-mcp.sh",
               "package.json",
-              "~/.config/Claude/claude_desktop_config.json",
-              "config/Claude/claude_desktop_config.json"
+              "package-lock.json",
+              "~/.config/Claude/claude_desktop_config.json"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T047 Implement `wrap-mcp.sh` at repo root \u2014 phases: (1) call `uv run mcplibrarian scan` or fall back to pure shell detection of `package.json` / `pyproject.toml`; (2) generate `package-lock.json` if missing using `docker run node:<ver>-slim npm install --package-lock-only`; (3) call `uv run mcplibrarian` (existing generator) to produce Dockerfile + docker-compose.yml in `docker-configs/<name>/`; (4) run `docker compose build`; (5) update `~/.config/Claude/claude_desktop_config.json` via jq merge; accept `[PLATFORM]` arg defaulting to `claude_code`; color-coded `[Step]` output matching CLI convention; exit codes 0/1/2/3' to [x]",
             "dependencies": [
-              "T023",
               "T024",
+              "T019",
+              "T023",
               "T002",
-              "T009",
-              "T019"
+              "T009"
             ]
           },
           {
@@ -834,13 +854,13 @@
             "agent_role": "Sentinel",
             "instruction": "Sentinel validation for wave 5 (T029, T047): verify all implementations pass tests",
             "file_locks": [
-              "docker-compose.yml",
-              "package-lock.json",
-              "wrap-mcp.sh",
               "pyproject.toml",
+              "docker-compose.yml",
+              "config/Claude/claude_desktop_config.json",
+              "wrap-mcp.sh",
               "package.json",
-              "~/.config/Claude/claude_desktop_config.json",
-              "config/Claude/claude_desktop_config.json"
+              "package-lock.json",
+              "~/.config/Claude/claude_desktop_config.json"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'Sentinel validation for wave 5 (T029, T047): verify all implementations pass tests' to [x]",
@@ -873,11 +893,11 @@
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T030 [US2] Add batch summary report to `wrap-all` in `src/mcp_dockerize/cli.py` \u2014 after all workers complete, print table: server name, status (\u2713/\u2717), duration; list each failure with its actionable error message; exit code 0 if all succeed, 1 if any fail' to [x]",
             "dependencies": [
-              "T026",
-              "T005",
-              "T025",
               "T028",
-              "T029"
+              "T029",
+              "T025",
+              "T005",
+              "T026"
             ]
           },
           {
@@ -885,9 +905,9 @@
             "agent_role": "Developer",
             "instruction": "T048 [P] Implement `list-wrapped.sh` at repo root \u2014 iterate `docker-configs/*/docker-compose.yml`; for each, check `docker compose ps | grep -q Up` to determine running state; print NAME + status emoji",
             "file_locks": [
-              "docker-configs/*/docker-compose.yml",
+              "docker-compose.yml",
               "list-wrapped.sh",
-              "docker-compose.yml"
+              "docker-configs/*/docker-compose.yml"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T048 [P] Implement `list-wrapped.sh` at repo root \u2014 iterate `docker-configs/*/docker-compose.yml`; for each, check `docker compose ps | grep -q Up` to determine running state; print NAME + status emoji' to [x]",
@@ -901,15 +921,15 @@
             "agent_role": "Developer",
             "instruction": "T050 Implement `unwrap-mcp.sh` at repo root \u2014 accept `<SERVER_NAME>` and optional `--keep-config`; remove entry from `~/.config/Claude/claude_desktop_config.json` via jq; delete `docker-configs/<name>/` unless `--keep-config`; print confirmation; never touch original server source",
             "file_locks": [
-              "unwrap-mcp.sh",
               "~/.config/Claude/claude_desktop_config.json",
-              "config/Claude/claude_desktop_config.json"
+              "config/Claude/claude_desktop_config.json",
+              "unwrap-mcp.sh"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T050 Implement `unwrap-mcp.sh` at repo root \u2014 accept `<SERVER_NAME>` and optional `--keep-config`; remove entry from `~/.config/Claude/claude_desktop_config.json` via jq; delete `docker-configs/<name>/` unless `--keep-config`; print confirmation; never touch original server source' to [x]",
             "dependencies": [
-              "T047",
-              "T024"
+              "T024",
+              "T047"
             ]
           },
           {
@@ -917,9 +937,9 @@
             "agent_role": "Sentinel",
             "instruction": "Sentinel validation for wave 6 (T030, T048, T050): verify all implementations pass tests",
             "file_locks": [
-              "unwrap-mcp.sh",
               "~/.config/Claude/claude_desktop_config.json",
-              "config/Claude/claude_desktop_config.json"
+              "config/Claude/claude_desktop_config.json",
+              "unwrap-mcp.sh"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'Sentinel validation for wave 6 (T030, T048, T050): verify all implementations pass tests' to [x]",
@@ -953,12 +973,12 @@
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T037 [US3] Wire `--platform` flag (repeatable via `multiple=True`) into `wrap` and `wrap-all` in `src/mcp_dockerize/cli.py` \u2014 call `get_platform(id).add_server(entry, compose_path)` for each specified platform after successful registration; store `registered_platforms` list in `RegistryEntry`' to [x]",
             "dependencies": [
-              "T026",
-              "T005",
-              "T025",
               "T028",
-              "T030",
-              "T029"
+              "T029",
+              "T025",
+              "T005",
+              "T026",
+              "T030"
             ]
           },
           {
@@ -966,16 +986,16 @@
             "agent_role": "Developer",
             "instruction": "T049 [P] Implement `health-check.sh` at repo root \u2014 accept `<SERVER_NAME>` arg; find `docker-configs/<name>/docker-compose.yml`; run L1 (container state via `docker compose ps`) and L2 (pipe `initialize` JSON-RPC and grep for `jsonrpc` in response); print human-readable status; exit 0 if healthy, 1 if unhealthy, 2 if not found",
             "file_locks": [
+              "docker-configs/<name>/docker-compose.yml",
               "docker-compose.yml",
-              "health-check.sh",
-              "docker-configs/<name>/docker-compose.yml"
+              "health-check.sh"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T049 [P] Implement `health-check.sh` at repo root \u2014 accept `<SERVER_NAME>` arg; find `docker-configs/<name>/docker-compose.yml`; run L1 (container state via `docker compose ps`) and L2 (pipe `initialize` JSON-RPC and grep for `jsonrpc` in response); print human-readable status; exit 0 if healthy, 1 if unhealthy, 2 if not found' to [x]",
             "dependencies": [
               "T023",
-              "T048",
-              "T047"
+              "T047",
+              "T048"
             ]
           },
           {
@@ -983,9 +1003,9 @@
             "agent_role": "Sentinel",
             "instruction": "Sentinel validation for wave 7 (T037, T049): verify all implementations pass tests",
             "file_locks": [
+              "docker-configs/<name>/docker-compose.yml",
               "docker-compose.yml",
-              "health-check.sh",
-              "docker-configs/<name>/docker-compose.yml"
+              "health-check.sh"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'Sentinel validation for wave 7 (T037, T049): verify all implementations pass tests' to [x]",
@@ -1018,13 +1038,13 @@
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T038 [US4] Add `health` Click subcommand in `src/mcp_dockerize/cli.py` \u2014 optional arg `SERVER_NAME` (if omitted, checks all registered servers); options: `--recover` (flag), `--history` (flag), `--json`; calls `MCPHealthChecker.check(entry)` for each target server; prints L1\u2013L4 results with \u2713/\u2717; updates `RegistryStore.update_health` after each check' to [x]",
             "dependencies": [
-              "T026",
-              "T005",
-              "T025",
               "T028",
-              "T030",
               "T037",
-              "T029"
+              "T029",
+              "T025",
+              "T005",
+              "T026",
+              "T030"
             ]
           },
           {
@@ -1064,14 +1084,14 @@
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T041 [US4] Add `--history` display to health subcommand in `src/mcp_dockerize/cli.py` \u2014 when `--history` set, load `health_history` from registry for the target server; print table of last 24 h: timestamp, status, response time; exit 0 if all targets healthy or stopped, 1 if any unhealthy' to [x]",
             "dependencies": [
-              "T026",
-              "T005",
-              "T025",
               "T028",
-              "T030",
-              "T038",
               "T037",
-              "T029"
+              "T029",
+              "T025",
+              "T005",
+              "T026",
+              "T038",
+              "T030"
             ]
           },
           {
@@ -1111,15 +1131,15 @@
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T043 [P] [US5] Add `list` Click subcommand in `src/mcp_dockerize/cli.py` \u2014 options: `--json`, `--status` (filter); load all entries from `RegistryStore.list_all()`; print table: NAME, RUNTIME, STATUS, PLATFORMS, LAST HEALTH; `--json` outputs JSON array per contract' to [x]",
             "dependencies": [
-              "T026",
-              "T005",
-              "T025",
               "T028",
-              "T030",
               "T041",
-              "T038",
               "T037",
-              "T029"
+              "T029",
+              "T025",
+              "T005",
+              "T026",
+              "T038",
+              "T030"
             ]
           },
           {
@@ -1159,16 +1179,16 @@
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T044 [P] [US5] Add `status` Click subcommand in `src/mcp_dockerize/cli.py` \u2014 required arg `SERVER_NAME`; load entry from registry; print detailed view: source path, config path, platforms, status, health summary, registration date; `--json` outputs full `RegistryEntry` as JSON; exit 1 if not found' to [x]",
             "dependencies": [
-              "T026",
-              "T005",
-              "T025",
               "T028",
-              "T030",
-              "T041",
-              "T038",
               "T043",
+              "T041",
               "T037",
-              "T029"
+              "T029",
+              "T025",
+              "T005",
+              "T026",
+              "T038",
+              "T030"
             ]
           },
           {
@@ -1208,17 +1228,17 @@
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T045 [US5] Add `remove` Click subcommand in `src/mcp_dockerize/cli.py` \u2014 required arg `SERVER_NAME`; options: `--keep-config`, `--keep-platform-entry`, `--yes`; prompt for confirmation unless `--yes`; call `RegistryStore.remove(name)`, call `platform.remove_server(name)` for each registered platform (unless `--keep-platform-entry`), delete `~/.config/mcp-librarian/<name>/` directory (unless `--keep-config`); never touch `source_path`' to [x]",
             "dependencies": [
-              "T026",
-              "T005",
-              "T025",
               "T028",
-              "T030",
-              "T041",
-              "T038",
-              "T044",
               "T043",
+              "T044",
+              "T041",
               "T037",
-              "T029"
+              "T029",
+              "T025",
+              "T005",
+              "T026",
+              "T038",
+              "T030"
             ]
           },
           {
@@ -1253,24 +1273,24 @@
             "agent_role": "Developer",
             "instruction": "T046 [US5] Add `scan` Click subcommand in `src/mcp_dockerize/cli.py` \u2014 required arg `SERVER_PATH`; option: `--fix` (apply auto-fixes without building), `--json`; run `SmartScan.run()` then `AutoFixer.fix_all()` if `--fix`; print detected metadata and issues table (IssueType, Severity, auto_fixable, fix_instruction); exit 0 if no blocking issues, 1 if blocking issues remain",
             "file_locks": [
-              "SmartScan.run",
-              "src/mcp_dockerize/cli.py"
+              "src/mcp_dockerize/cli.py",
+              "SmartScan.run"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'T046 [US5] Add `scan` Click subcommand in `src/mcp_dockerize/cli.py` \u2014 required arg `SERVER_PATH`; option: `--fix` (apply auto-fixes without building), `--json`; run `SmartScan.run()` then `AutoFixer.fix_all()` if `--fix`; print detected metadata and issues table (IssueType, Severity, auto_fixable, fix_instruction); exit 0 if no blocking issues, 1 if blocking issues remain' to [x]",
             "dependencies": [
-              "T026",
-              "T005",
-              "T025",
               "T028",
-              "T030",
-              "T041",
-              "T038",
-              "T045",
-              "T044",
               "T043",
+              "T044",
+              "T041",
               "T037",
-              "T029"
+              "T029",
+              "T025",
+              "T005",
+              "T045",
+              "T026",
+              "T038",
+              "T030"
             ]
           },
           {
@@ -1278,8 +1298,8 @@
             "agent_role": "Sentinel",
             "instruction": "Sentinel validation for wave 13 (T046): verify all implementations pass tests",
             "file_locks": [
-              "SmartScan.run",
-              "src/mcp_dockerize/cli.py"
+              "src/mcp_dockerize/cli.py",
+              "SmartScan.run"
             ],
             "constitution_rules": [],
             "completion_handshake": "Upon success, update tasks.md line containing 'Sentinel validation for wave 13 (T046): verify all implementations pass tests' to [x]",
