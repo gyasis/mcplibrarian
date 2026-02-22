@@ -359,6 +359,12 @@ if any(indicator in p for indicator in ["/media/", "/mnt/", "Drive", "Storage"])
 - Recorded architectural decisions
 - Established workflows and pitfalls
 
+**v1.1 (2026-02-19):** Repository organization update
+- Project relocated to /home/gyasis/Documents/code/mcplibrarian (was under AIdomaincertification/)
+- All stale path references updated across memory bank files
+- Git state: 2 commits (8af3991, f92baae), remote https://github.com/gyasis/mcplibrarian.git
+- 1 commit ahead of origin/main (f92baae not yet pushed to remote)
+
 ---
 
 *This file is continuously updated as new patterns emerge and project intelligence grows.*

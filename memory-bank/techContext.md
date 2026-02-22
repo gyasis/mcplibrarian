@@ -106,7 +106,7 @@ mcplibrarian/
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Clone repository
-cd /home/gyasis/Documents/code/AIdomaincertification/mcplibrarian
+cd /home/gyasis/Documents/code/mcplibrarian
 
 # Install dependencies
 uv sync
@@ -375,7 +375,7 @@ MCP_DOCKERIZE_VERBOSE=0
 
 ```bash
 # Current working directory
-PWD=/home/gyasis/Documents/code/AIdomaincertification/mcplibrarian
+PWD=/home/gyasis/Documents/code/mcplibrarian
 
 # User home directory
 HOME=/home/gyasis
