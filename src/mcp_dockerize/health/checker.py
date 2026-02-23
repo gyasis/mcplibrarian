@@ -18,6 +18,7 @@ import json
 import logging
 import subprocess
 import time
+from pathlib import Path
 from typing import Any
 
 from mcp_dockerize.health.states import HealthCheckResult, HealthStatus
@@ -87,6 +88,23 @@ class MCPHealthChecker:
         """
         compose_path = self._get_compose_path(entry)
         service_name = entry.name
+
+        # Pre-L1 — source directory still exists on disk?
+        if entry.source_path and not Path(entry.source_path).exists():
+            logger.debug(
+                "source_missing for %s: path not found: %s",
+                service_name,
+                entry.source_path,
+            )
+            return HealthCheckResult(
+                server_name=service_name,
+                container_running=False,
+                protocol_responds=False,
+                tools_available=False,
+                response_time_ms=0.0,
+                status=HealthStatus.source_missing,
+                error_message=f"Source directory not found: {entry.source_path}",
+            )
 
         result = HealthCheckResult(
             server_name=service_name,

@@ -1,0 +1,12 @@
+FROM node:{{ runtime_version }}-slim
+
+WORKDIR /app
+
+# Dependencies installed at build time from package files
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production
+
+# Source is NOT copied — mounted as a volume at runtime
+# CMD will be overridden by docker-compose volume mount pointing to host source
+
+CMD ["node", "{{ entry_point }}"]

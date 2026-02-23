@@ -14,10 +14,17 @@ build/
 # Env
 .env
 .env.*
+!.env.example
 
 # Databases
 *.db
 *.sqlite
+
+# Backup files
+*.bak
+
+# Execution plan
+execution_plan.json
 
 # IDE / tools
 .claude/

@@ -78,17 +78,32 @@ mcplibrarian/
 
 ---
 
-## Running the Existing CLI
+## Running the CLI
 
 ```bash
-# Basic wrap (Python server only, current state)
-uv run mcplibrarian /path/to/python-mcp-server
+# Dry-run first to see what would happen (no changes)
+mcplibrarian wrap /path/to/server --dry-run
 
-# With build and test
-uv run mcplibrarian /path/to/server --build --test --verbose
+# Wrap a server (generates Dockerfile + docker-compose.yml, builds, registers)
+mcplibrarian wrap /path/to/python-mcp-server
+
+# Wrap with verbose output and specific platform
+mcplibrarian wrap /path/to/server --platform cursor --verbose
+
+# Batch wrap all servers in a directory
+mcplibrarian wrap-all /path/to/servers/ --yes
+
+# Scan without building (analysis only)
+mcplibrarian scan /path/to/server
+
+# List all wrapped servers
+mcplibrarian list
+
+# Check health
+mcplibrarian health
 
 # Check what's generated
-ls docker-configs/<server-name>/
+ls ~/.config/mcp-librarian/servers/<server-name>/
 ```
 
 ---

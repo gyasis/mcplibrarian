@@ -1,50 +1,16 @@
-# Python UV-based Dockerfile Template
-# For self-contained MCP servers (snowflake, mariadb, etc.)
-# Code is copied into container, dependencies installed with uv
-
-FROM python:{{ python_version }}-slim AS builder
-
-WORKDIR /build
-
-# Install uv package manager
-RUN pip install --no-cache-dir uv
-
-# Copy project files
-COPY pyproject.toml ./
-{% if 'src/' in entry_point %}
-COPY src/ ./src/
-{% endif %}
-COPY {{ entry_point.split('/')[0] if '/' in entry_point else entry_point }} ./{{ entry_point.split('/')[0] if '/' in entry_point else entry_point }}
-
-# Install dependencies with uv
-RUN uv venv /app/.venv && \
-    . /app/.venv/bin/activate && \
-    uv pip install --no-cache .
-
-# Runtime stage
-FROM python:{{ python_version }}-slim
+FROM python:{{ runtime_version }}-slim
 
 WORKDIR /app
 
-# Copy virtual environment from builder
-COPY --from=builder /app/.venv /app/.venv
+# Install uv
+RUN pip install uv --no-cache-dir
 
-# Copy source code
-{% if 'src/' in entry_point %}
-COPY src/ ./src/
-{% endif %}
-COPY {{ entry_point.split('/')[0] if '/' in entry_point else entry_point }} ./{{ entry_point.split('/')[0] if '/' in entry_point else entry_point }}
+# Copy project files
+COPY pyproject.toml .
+COPY uv.lock .
+COPY . .
 
-# Create non-root user for security
-RUN useradd -m -u 1000 mcp && \
-    chown -R mcp:mcp /app
+# Install dependencies via uv
+RUN uv sync --no-dev --frozen
 
-# Environment variables
-ENV PATH="/app/.venv/bin:$PATH" \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
-
-USER mcp
-
-# Entry point (console script from pyproject.toml)
-ENTRYPOINT ["{{ entry_point }}"]
+ENTRYPOINT ["uv", "run", "{{ entry_point }}"]
