@@ -67,9 +67,9 @@ def wrap(
 
     Example:
 
-        mcplibrarian wrap /home/user/my-mcp-server
+        mcplibrarian wrap ./my-mcp-server
 
-        mcplibrarian wrap /home/user/my-mcp-server --platform cursor --platform vscode
+        mcplibrarian wrap ./my-mcp-server --platform cursor --platform vscode
     """
     server_path_abs = Path(server_path).resolve()
 
@@ -178,9 +178,9 @@ def wrap_all(
 
     Example:
 
-        mcplibrarian wrap-all /home/user/mcp-servers --workers 4
+        mcplibrarian wrap-all ./mcp-servers --workers 4
 
-        mcplibrarian wrap-all /home/user/mcp-servers --filter 'my-*' --yes
+        mcplibrarian wrap-all ./mcp-servers --filter 'my-*' --yes
     """
     scan_dir_abs = Path(scan_dir).resolve()
 
@@ -689,11 +689,11 @@ def scan_server(path: str, json_output: bool, fix: bool) -> None:
 
     Example:
 
-        mcplibrarian scan /home/user/my-mcp-server
+        mcplibrarian scan ./my-mcp-server
 
-        mcplibrarian scan /home/user/my-mcp-server --fix
+        mcplibrarian scan ./my-mcp-server --fix
 
-        mcplibrarian scan /home/user/my-mcp-server --json
+        mcplibrarian scan ./my-mcp-server --json
     """
     server_path = Path(path).resolve()
 

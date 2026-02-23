@@ -32,8 +32,8 @@ class ComposeGenerator:
         generator = ComposeGenerator()
         compose_path = generator.generate(
             metadata=metadata,
-            config_dir=Path("/tmp/my-server-config"),
-            server_path=Path("/home/user/my-server"),
+            config_dir=Path.home() / ".config" / "mcp-librarian" / "my-server",
+            server_path=Path.home() / "projects" / "my-server",
         )
     """
 
