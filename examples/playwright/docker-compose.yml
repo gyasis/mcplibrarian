@@ -1,0 +1,9 @@
+# Auto-generated docker-compose.yml for playwright-mcp-wrapper
+version: '3.8'
+
+services:
+  playwright-mcp-wrapper:
+    build: .
+    container_name: mcp-playwright-mcp-wrapper
+    stdin_open: true
+    tty: true
