@@ -2,19 +2,19 @@
 
 ## Current Session Focus
 
-**Date:** 2026-01-05
-**Working On:** Memory Bank Initialization & Project Documentation
-**Branch:** main (first commit: 8af3991)
+**Date:** 2026-02-19
+**Working On:** Project Relocation, Git Hygiene, and Repo Organization
+**Branch:** main
+**Commits:** 8af3991 (first commit), f92baae (full project commit)
 
 ## What Just Happened
 
-1. **PRD Completed:** Comprehensive Product Requirements Document created at `/home/gyasis/Documents/code/AIdomaincertification/mcplibrarian/prd/MCP_LIBRARIAN_AUTOMATION_PRD.md`
-2. **Initial Implementation:** Basic CLI tool structure exists with:
-   - Python detector (detects FastMCP servers from pyproject.toml)
-   - Dockerfile generator (creates optimized containers)
-   - Template-based generation (Jinja2 templates)
-3. **Example Config Generated:** deeplake-rag MCP server successfully dockerized (proof of concept)
-4. **Memory Bank Created:** Initializing institutional memory for project continuity
+1. **Project Relocated:** Moved from `/home/gyasis/Documents/code/mcplibrarian` to `/home/gyasis/Documents/code/mcplibrarian` - promoted to top-level code directory for easier access.
+2. **Git History Cleaned:** A proper full project commit (f92baae) was made adding all source code, docker configs, PRD, memory-bank files, and uv.lock.
+3. **Remote Set:** Repo remote confirmed as `https://github.com/gyasis/mcplibrarian.git`.
+4. **.gitignore Fixed:** Now properly excludes `.venv/`, `__pycache__/`, `*.pyc`, `*.db`, `.claude/`, `.specstory/`, `.cursorindexingignore`.
+5. **Working Tree Clean:** `git status` shows nothing to commit, clean working tree.
+6. **Ahead of Remote:** Local main is 1 commit ahead of `origin/main` (f92baae not yet pushed).
 
 ## Current Project State
 
@@ -22,7 +22,7 @@
 
 **Source Code:**
 ```
-/home/gyasis/Documents/code/AIdomaincertification/mcplibrarian/
+/home/gyasis/Documents/code/mcplibrarian/
 ├── src/mcp_dockerize/
 │   ├── cli.py                    # :white_check_mark: Main CLI entry point
 │   ├── detectors/
@@ -34,7 +34,9 @@
 │   └── deeplake-rag/             # :white_check_mark: Example generated config
 ├── prd/
 │   └── MCP_LIBRARIAN_AUTOMATION_PRD.md  # :white_check_mark: Complete PRD
+├── memory-bank/                  # :white_check_mark: Institutional memory (6 files)
 ├── pyproject.toml                # :white_check_mark: Project metadata
+├── uv.lock                       # :white_check_mark: Locked dependencies (committed)
 └── README.md                     # :warning: Outdated (shows old "mcp-dockerize" branding)
 ```
 
@@ -100,6 +102,11 @@
 4. **Health checks required:** Must validate MCP protocol responses, not just container startup
 5. **Registry auto-update:** Must eliminate manual claude_desktop_config.json editing
 
+### Repository Decisions (2026-02-19)
+1. **Top-level promotion:** Moved from AIdomaincertification subdirectory to /home/gyasis/Documents/code/mcplibrarian for easier access and cleaner organization.
+2. **Committed everything:** All source, configs, PRD, memory-bank, and uv.lock committed in single clean commit (f92baae).
+3. **Proper .gitignore:** Excludes virtual envs, caches, DBs, and IDE-specific files (.claude/, .specstory/, .cursorindexingignore).
+
 ## Known Issues & Caveats
 
 ### Current Limitations
@@ -124,11 +131,19 @@
 
 ## Session Notes
 
-### What Changed This Session
+### What Changed in Previous Session (2026-01-05)
 - Created memory-bank folder structure
 - Initialized projectbrief.md, productContext.md, activeContext.md
 - Documented current state based on codebase analysis and PRD
 - Identified immediate next steps for development
+
+### What Changed This Session (2026-02-19)
+- Project relocated from /home/gyasis/Documents/code/mcplibrarian to /home/gyasis/Documents/code/mcplibrarian
+- .gitignore corrected to exclude .venv/, __pycache__/, *.pyc, *.db, .claude/, .specstory/, .cursorindexingignore
+- Full project committed (commit f92baae) with all source code, configs, docs, memory-bank files, uv.lock
+- Remote confirmed as https://github.com/gyasis/mcplibrarian.git
+- Working tree is clean; local main is 1 commit ahead of origin/main (not yet pushed)
+- Memory bank files updated to reflect new canonical project path
 
 ### Discovered Patterns
 - **Volume Mount Strategy:** Mount at original host path if starts with /media/ or /mnt/ (handles hardcoded paths)

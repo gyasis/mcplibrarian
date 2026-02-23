@@ -4,9 +4,31 @@
 
 **Current Phase:** Foundation (Phase 1 of 3)
 **Overall Completion:** ~15%
-**Last Updated:** 2026-01-05
+**Last Updated:** 2026-02-19
 
 ## Milestone Tracking
+
+### Milestone 0: Repository Organization :white_check_mark: COMPLETE
+
+**Date:** 2026-02-19
+**Status:** :white_check_mark: Completed
+**Completion:** 100%
+
+**Tasks:**
+- :white_check_mark: Project relocated to canonical path: /home/gyasis/Documents/code/mcplibrarian
+- :white_check_mark: .gitignore fixed (.venv/, __pycache__/, *.pyc, *.db, .claude/, .specstory/, .cursorindexingignore)
+- :white_check_mark: Full project committed (f92baae) - all source, configs, PRD, memory-bank, uv.lock
+- :white_check_mark: Remote confirmed: https://github.com/gyasis/mcplibrarian.git
+- :white_check_mark: Clean working tree; git history shows 2 commits
+- :white_check_mark: Memory bank files updated to reflect new project path
+
+**Outcomes:**
+- Repository is properly organized with a clean, intentional git history
+- .gitignore prevents accidental commits of secrets, caches, and IDE artifacts
+- Project is accessible from top-level code directory, not buried in subdirectory
+- Ready to push to GitHub (1 commit ahead of origin/main)
+
+---
 
 ### Milestone 1: Foundation & PRD :white_check_mark: COMPLETE
 
@@ -333,11 +355,12 @@
 
 ## Next Session Priorities
 
-### Immediate (Today)
+### Immediate (Next Session)
 
-1. :white_large_square: Create Jinja2 templates (python-uv.Dockerfile.j2, python-direct.Dockerfile.j2)
-2. :white_large_square: Test template rendering with deeplake-rag example
-3. :white_large_square: Update README.md to reflect "mcplibrarian" branding
+1. :warning: Push to remote: `git push origin main` (local is 1 commit ahead of origin/main)
+2. :white_large_square: Create Jinja2 templates (python-uv.Dockerfile.j2, python-direct.Dockerfile.j2)
+3. :white_large_square: Test template rendering with deeplake-rag example
+4. :white_large_square: Update README.md to reflect "mcplibrarian" branding
 
 ### This Week (Week 1)
 
@@ -389,6 +412,12 @@
 - Core implementation: 6 Python modules
 - Generated configs: 1 example (deeplake-rag)
 - **Velocity:** Foundation complete, ~15% overall progress
+
+**2026-02-19 (Repo Hygiene):**
+- Project promoted to top-level: /home/gyasis/Documents/code/mcplibrarian
+- .gitignore corrected, full project committed (f92baae)
+- Remote confirmed: https://github.com/gyasis/mcplibrarian.git
+- **Velocity:** No feature progress; infrastructure/organization milestone completed
 
 **Projected Week 2:**
 - Templates created

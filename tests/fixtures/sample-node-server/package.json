@@ -1,0 +1,11 @@
+{
+  "name": "sample-node-mcp-server",
+  "version": "1.0.0",
+  "description": "Minimal MCP server fixture for testing",
+  "main": "index.js",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "scripts": { "start": "node index.js" }
+}

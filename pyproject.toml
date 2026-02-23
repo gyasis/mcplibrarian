@@ -10,10 +10,11 @@ dependencies = [
     "toml>=0.10.2",
     "docker>=7.0.0",
     "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
 ]
 
 [project.scripts]
-mcplibrarian = "mcp_dockerize.cli:main"
+mcplibrarian = "mcp_dockerize.cli:cli"
 
 [build-system]
 requires = ["hatchling"]

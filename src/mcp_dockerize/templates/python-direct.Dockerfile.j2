@@ -1,41 +1,15 @@
-# Python Direct Execution Dockerfile Template
-# For volume-mounted MCP servers (deeplake, etc.)
-# Code is mounted from host, dependencies installed in container
-
-FROM python:{{ python_version }}-slim
+FROM python:{{ runtime_version }}-slim
 
 WORKDIR /app
 
-# Install build dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc g++ && \
-    rm -rf /var/lib/apt/lists/*
+# Install build tools for packages with C extensions
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install pip and dependencies
-{% if dependencies %}
-# Install dependencies from pyproject.toml
-RUN pip install --no-cache-dir {% for dep in dependencies %}{{ dep }} {% endfor %}
-{% else %}
-# Copy requirements if they exist
-COPY requirements.txt* ./
-RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
-{% endif %}
+COPY requirements.txt .
+RUN pip install -r requirements.txt --no-cache-dir
 
-# Also install thefuzz (modern replacement for fuzzywuzzy)
-RUN pip install --no-cache-dir thefuzz
+COPY . .
 
-# Create non-root user for security
-RUN useradd -m -u 1000 mcp && \
-    mkdir -p /app /data /keys /media /mnt && \
-    chown -R mcp:mcp /app /data /keys
-
-# Environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH=/app
-
-USER mcp
-
-# Entry point (direct Python execution)
-# Code will be mounted at runtime via volume
-ENTRYPOINT ["python", "{{ entry_point }}"]
+CMD ["python", "{{ entry_point }}"]

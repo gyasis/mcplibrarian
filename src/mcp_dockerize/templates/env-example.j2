@@ -1,0 +1,24 @@
+# .env.example — Environment variables for {{ service_name | default("this MCP server") }}
+# Copy this file to .env and fill in your values.
+# NEVER commit .env to version control — it contains secrets.
+#
+# Variables marked REQUIRED must be set before the server will start.
+# Variables marked OPTIONAL have safe defaults or are conditionally needed.
+{% for var in env_vars %}
+
+{% if var.required %}
+# REQUIRED — {{ var.description }}
+{% if var.example %}
+{{ var.name }}={{ var.example }}
+{% else %}
+{{ var.name }}=<{{ var.description | replace(" ", "_") | upper }}>
+{% endif %}
+{% else %}
+# OPTIONAL — {{ var.description }}
+{% if var.example %}
+{{ var.name }}={{ var.example }}
+{% else %}
+{{ var.name }}=
+{% endif %}
+{% endif %}
+{% endfor %}

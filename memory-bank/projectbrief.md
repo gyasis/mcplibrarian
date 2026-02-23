@@ -4,7 +4,7 @@
 
 **Name:** MCP Librarian (mcplibrarian)
 **Version:** 0.1.0 (Early Development)
-**Repository:** /home/gyasis/Documents/code/AIdomaincertification/mcplibrarian
+**Repository:** /home/gyasis/Documents/code/mcplibrarian
 **Initial Commit:** 8af3991 (2026-01-05)
 **Status:** Active Development - PRD Complete, Implementation Starting
 
@@ -41,7 +41,7 @@ Transform the chaotic, error-prone process of containerizing MCP servers into a 
 ## Current Stage
 
 **Phase:** Foundation - PRD Complete
-**Working Directory:** /home/gyasis/Documents/code/AIdomaincertification/mcplibrarian
+**Working Directory:** /home/gyasis/Documents/code/mcplibrarian
 **Current Implementation:** Basic CLI tool with Python detector and Dockerfile generator (Phase 1 of dual-track strategy)
 
 ## Key Constraints

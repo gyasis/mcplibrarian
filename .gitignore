@@ -14,12 +14,28 @@ build/
 # Env
 .env
 .env.*
+!.env.example
 
 # Databases
 *.db
 *.sqlite
 
+# Backup files
+*.bak
+
+# Execution plan
+execution_plan.json
+
 # IDE / tools
 .claude/
 .specstory/
 .cursorindexingignore
+
+# MCP Librarian runtime data
+.config/mcp-librarian/
+
+# Auto-generated test artifacts
+tests/fixtures/sample-node-server/package-lock.json
+
+# Docker build artifacts
+docker-configs/

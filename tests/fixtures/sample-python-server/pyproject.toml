@@ -1,0 +1,15 @@
+[project]
+name = "sample-python-server"
+version = "1.0.0"
+description = "Minimal Python MCP server fixture for testing"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.0.0",
+]
+
+[project.scripts]
+sample-python-server = "server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

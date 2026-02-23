@@ -1,10 +1,12 @@
 # MCP Librarian Automation: Product Requirements Document
 
-**Version:** 1.0
-**Date:** 2026-01-05
-**Status:** DRAFT
+**Version:** 1.1
+**Date:** 2026-02-19
+**Status:** REVISED DRAFT
 **Owner:** Product Team
 **Classification:** Internal
+
+> **v1.1 Strategy Update (2026-02-19):** Claude Code added native MCP lazy loading (`defer_loading`) in January 2026. However, research confirms that **5 out of 7 major AI coding platforms** (Cursor, VS Code Copilot, Windsurf, Continue.dev, Block's Goose) do **not** support native lazy loading. mcplibrarian is now positioned as the **cross-platform MCP containerization standard** — not a Claude-specific tool.
 
 ---
 
@@ -27,18 +29,32 @@
 
 ### 1.1 Vision Statement
 
-**"Make MCP setup painless."**
+**"The cross-platform standard for MCP server containerization."**
 
-MCP Librarian transforms the chaotic, error-prone process of wrapping MCP servers in Docker containers into a seamless, one-command experience. By automating the entire containerization lifecycle, we enable developers to achieve 99% token savings without fighting package-lock.json errors, docker-compose.yml syntax issues, or manual registry updates.
+MCP Librarian transforms the chaotic, error-prone process of wrapping MCP servers in Docker containers into a seamless, one-command experience. While Claude Code now has native MCP lazy loading, **5 out of 7 major AI coding platforms still lack this capability** — and all platforms benefit from the isolation, portability, and security that proper containerization provides.
+
+**The market reality (as of early 2026):**
+
+| Platform | Native Lazy Loading | Needs mcplibrarian? |
+|----------|--------------------|--------------------|
+| Claude Code | ✅ Yes (`defer_loading`) | For security/portability only |
+| Cursor IDE | ❌ No | **Yes — only solution available** |
+| VS Code Copilot | ❌ No | **Yes — feature requested, not built** |
+| Windsurf | ❌ No | **Yes — eager loading by default** |
+| Continue.dev | Partial (middleware) | **Yes — native client has no support** |
+| Block's Goose | Architectural only | **Yes — `defer_loading` flag not respected** |
+| opencode (SST) | ❌ No (Issue #9350 open) | **Yes — community requesting this exact feature** |
+| OpenAI Codex | Alternative (Skills/AGENTS.md) | **Yes — different spec, Docker still needed** |
 
 ### 1.2 The North Star
 
-**Goal:** Reduce time-to-first-tool from 30+ minutes to under 60 seconds, with a 95%+ build success rate on first attempt.
+**Goal:** Be the one-command MCP containerization tool that works across every AI coding platform, reducing time-to-first-tool from 30+ minutes to under 60 seconds with a 95%+ build success rate.
 
 **Impact:**
 - Developers spend time using AI, not configuring infrastructure
-- Token budgets go 10x further with lazy-loaded MCP servers
-- Enterprise teams can manage 100+ MCP servers without context saturation
+- **Cursor/VS Code/Windsurf users** finally get lazy loading (no native option exists for them)
+- Enterprise teams can manage 100+ MCP servers across any platform without context saturation
+- Containerized servers are portable, secure, and reproducible across machines and teams
 
 ### 1.3 Strategic Approach: Dual-Track Parallel Development
 
@@ -66,7 +82,7 @@ We are pursuing **TWO complementary tracks simultaneously** to balance immediate
 
 ### 2.1 The Core Problem
 
-**Current Reality:** Wrapping MCP servers in Docker containers for token optimization requires manual, error-prone steps that violate the principle "make MCP setup painless."
+**Current Reality:** Wrapping MCP servers in Docker containers requires manual, error-prone steps that violate the principle "make MCP setup painless." This problem is **platform-agnostic** — it affects every AI coding assistant user, not just Claude Code users.
 
 **Pain Point Breakdown:**
 - Manual docker-compose.yml generation (syntax errors, wrong paths, missing env vars)
@@ -76,11 +92,15 @@ We are pursuing **TWO complementary tracks simultaneously** to balance immediate
 - Manual registry updates for every new server
 - No health checks to verify containers are actually working
 
+**The Platform Gap (2026 Context):**
+Claude Code introduced native `defer_loading` in January 2026 — but this only helps Claude Code users. Cursor IDE, VS Code Copilot, Windsurf, Continue.dev, and Block's Goose have **no native lazy loading**. For these platforms, Docker-based containerization is the **only available solution** for context management and tool isolation. This represents the majority of the AI coding assistant market.
+
 **Business Impact:**
-- 30+ minutes per MCP server setup
+- 30+ minutes per MCP server setup (on any platform)
 - 60-70% failure rate on first attempt
 - High abandonment (users give up and load all servers upfront)
-- Token savings potential remains unrealized
+- Token savings potential remains unrealized on 5 of 7 platforms
+- Security risk from non-containerized servers running with host access
 
 ### 2.2 User Stories
 
@@ -217,6 +237,31 @@ libra wrap /path/to/deeplake-rag --data-volume "/media/gyasis/Drive 2/..."
 [Registry] Added to registry with 99% token savings
 ```
 
+#### Story 4: "The Cursor Power User" *(Added v1.1)*
+
+**Persona:** Jordan, senior engineer on Cursor IDE
+**Context:** Uses 12 MCP servers in Cursor, no native lazy loading available
+
+**Journey:**
+```
+Problem: "Cursor loads all my MCP tools at startup. 8GB RAM used before I code."
+Research: Finds Claude Code added native defer_loading — but Jordan uses Cursor.
+Attempt: Searches for Cursor-native solution, finds nothing.
+
+Discovers mcplibrarian:
+→ Wraps all 12 servers in Docker containers
+→ Each server starts on-demand, stops after 5min idle
+→ RAM drops from 8GB to ~400MB
+→ Context window no longer pre-filled with 50k tokens of tool definitions
+```
+
+**Why mcplibrarian is the only option for Jordan:**
+- Cursor doesn't support `defer_loading` (confirmed, Jan 2026)
+- Community proxy `mcp-on-demand` requires manual Docker config (same problem)
+- mcplibrarian automates the containerization Jordan would otherwise do by hand
+
+---
+
 ### 2.3 Problem Impact Summary
 
 | Metric | Current State | User Impact |
@@ -255,6 +300,47 @@ ERROR: Missing package-lock.json
 - Cycle of trial-and-error begins
 
 **Key Insight:** This single issue exposed a fundamental flaw - **we generate configuration but don't validate it will actually work.**
+
+### 3.1b Competitive Landscape Update (v1.1 — February 2026)
+
+> **Context:** This section was added after Anthropic released native MCP lazy loading for Claude Code in January 2026. The competitive landscape has shifted — but the market opportunity has been clarified, not eliminated.
+
+#### What Changed
+
+**January 2026:** Anthropic introduced `defer_loading: true` flag for MCP servers in Claude Code. Tools marked with this flag are excluded from the initial context and discovered on-demand via a native `ToolSearch` tool using Regex/BM25 search. This achieves ~85-95% token reduction natively — no Docker proxy required.
+
+```json
+// Claude Code now handles this natively:
+{
+  "mcpServers": {
+    "github": {
+      "command": "...",
+      "defer_loading": true
+    }
+  }
+}
+```
+
+#### What Did NOT Change
+
+The 5 other major platforms **do not support `defer_loading`**:
+
+| Platform | Status | Evidence |
+|----------|--------|----------|
+| **Cursor IDE** | No native support | Loads all tools globally at launch from `~/.cursor/mcp.json`; community uses Docker proxies as only workaround |
+| **VS Code Copilot** | No native support | GitHub Issue #288310 opened Jan 2026 requesting the feature — not implemented |
+| **Windsurf** | No native support | Default eager loading; `~/.codeium/windsurf/mcp_config.json` has no `defer_loading` field |
+| **Continue.dev** | Middleware only | Relies on server-side aggregation, not native client-side deferral |
+| **Block's Goose** | Architectural workaround | Uses "Summon/Powers" paradigm — `defer_loading` JSON flag not respected |
+| **opencode (SST)** | No native support | Eager loads all tools at startup; GitHub Issue #9350 filed but not implemented |
+
+#### Market Opportunity Reframe
+
+The original PRD positioned mcplibrarian as solving a problem for Claude Code users. The revised positioning:
+
+**mcplibrarian = the cross-platform Docker automation layer that gives every AI coding assistant user what Claude Code users now get natively.**
+
+---
 
 ### 3.2 Current System Input/Output Flow
 
@@ -2918,33 +3004,52 @@ libra quickstart
 
 ---
 
-#### Risk 5: Competing Solutions
+#### Risk 5: Competing Solutions *(Updated v1.1)*
 
-**Risk Level:** LOW
-**Probability:** 20%
+**Risk Level:** MEDIUM (revised from LOW)
+**Probability:** 40% (revised upward — Claude Code native support already shipped)
 **Impact:** MEDIUM
 
 **Description:**
-- Docker MCP Toolkit (official from Docker)
-- Other community tools emerge
-- Claude Code adds native lazy loading
+- ✅ **Claude Code native lazy loading SHIPPED** (January 2026 — `defer_loading` flag)
+- Docker MCP Toolkit (official from Docker — macOS/Windows only, not Linux)
+- Community tools like `mcp-on-demand` (manual config, no auto-generation)
+- Other platforms may add native lazy loading over time
+
+**Updated Assessment (v1.1):**
+Claude Code's native `defer_loading` eliminated the token-saving use case **for Claude Code users only**. However:
+- Claude Code represents ~30-40% of the AI coding assistant market
+- **Cursor, VS Code Copilot, Windsurf, Continue.dev, Goose = ~60-70% of market** — none have native lazy loading
+- Even for Claude Code users, containerization still provides security, portability, and isolation value
+
+**Revised Risk Timeline:**
+| Platform | Risk of Obsolescence | Timeline |
+|----------|---------------------|----------|
+| Claude Code | **Already obsolete for token savings** | Shipped Jan 2026 |
+| Cursor | Low — no roadmap for `defer_loading` | Unknown |
+| VS Code | Medium — feature requested, Microsoft slow | 6-12 months |
+| Windsurf | Low — different architectural focus | 12+ months |
+| opencode (SST) | Low — Issue #9350 filed, not on roadmap | 12+ months |
+| Goose | Low — uses own "Summon" paradigm | N/A |
 
 **Mitigation Strategy:**
 
-**Strategy 1: Differentiation**
-- **vs Docker MCP Toolkit:** Better DX, auto-fixes, health monitoring, team features
-- **vs Community Tools:** First-mover advantage, comprehensive feature set, active development
-- **vs Native Lazy Loading:** Bridge solution until native support, migration path provided
+**Strategy 1: Cross-Platform Differentiation**
+- **vs Docker MCP Toolkit:** Linux support, auto-detection, security-first credential handling
+- **vs `mcp-on-demand`:** Automated config generation — users don't write YAML manually
+- **vs Native Lazy Loading (Claude only):** Works for every other platform too
+- **vs Native Lazy Loading (future platforms):** Containerization benefits persist regardless
 
-**Strategy 2: Open Source & Extensibility**
+**Strategy 2: Expand Value Beyond Token Savings**
+- Security isolation (sandboxed containers, no host access)
+- Team portability (share configs across developers)
+- Cross-machine reproducibility (works identically on any machine)
+- Health monitoring (detect when servers silently fail)
+
+**Strategy 3: Open Source & Community**
 - Open source from day 1 (MIT license)
 - Plugin architecture for community extensions
-- Easy to fork and customize
-
-**Strategy 3: Partnerships**
-- Collaborate with Docker team (official integration?)
-- Work with Anthropic on future Claude Code features
-- Partner with popular MCP server maintainers
+- Integrate with platform-specific config formats (Cursor mcp.json, etc.)
 
 ---
 

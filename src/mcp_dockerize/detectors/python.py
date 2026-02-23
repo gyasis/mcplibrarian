@@ -1,108 +1,173 @@
 """Python FastMCP server detector."""
 
-import os
 import re
-import toml
 from pathlib import Path
-from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import Dict, List, Union
+
+import toml
+
+from mcp_dockerize.detectors.base import AbstractDetector, ServerMetadata  # re-exported for backward compat
+
+# Backward-compatible re-export so existing callers that do
+#   from mcp_dockerize.detectors.python import ServerMetadata
+# continue to resolve without modification.
+__all__ = ["PythonDetector", "ServerMetadata"]
 
 
-@dataclass
-class ServerMetadata:
-    """Metadata about detected MCP server."""
-    name: str
-    server_type: str  # "python-uv", "python-direct", "python-fastmcp"
-    python_version: str
-    entry_point: str
-    dependencies: List[str] = field(default_factory=list)
-    env_vars: Dict[str, str] = field(default_factory=dict)
-    env_file: Optional[str] = None
-    volume_mounts: Dict[str, str] = field(default_factory=dict)  # source:dest
-    warnings: List[str] = field(default_factory=list)
+# Runtime string mapping from old "python-*" style to new "python_*" style.
+_RUNTIME_MAP: Dict[str, str] = {
+    "python-uv": "python_uv",
+    "python-direct": "python_direct",
+    "python-fastmcp": "python_direct",
+}
 
 
-class PythonDetector:
-    """Detect and analyze Python FastMCP servers."""
+class PythonDetector(AbstractDetector):
+    """Detect and analyse Python FastMCP servers.
 
-    def can_detect(self, path: str) -> bool:
-        """Check if path contains a Python MCP server."""
-        pyproject = Path(path) / "pyproject.toml"
-        return pyproject.exists()
+    Extends ``AbstractDetector`` and returns ``ServerMetadata`` from
+    ``detectors.base``.  All existing detection logic is preserved:
+    Python version extraction, server-type classification, ``.env``
+    parsing, volume detection and security checks.
 
-    def detect(self, path: str) -> ServerMetadata:
-        """Detect Python MCP server and extract metadata."""
+    Backward Compatibility
+    ----------------------
+    Both ``can_detect`` and ``detect`` accept ``str | Path`` so existing
+    callers (e.g. ``cli.py``) that pass a plain string continue to work
+    without modification.
+
+    The ``ServerMetadata`` returned by ``detect`` populates *both* the
+    new canonical fields (``runtime``, ``runtime_version``, ``env_vars``
+    as a list, ``data_volumes`` as a list) *and* the legacy optional
+    fields kept in ``base.ServerMetadata`` for backward compat
+    (``server_type``, ``python_version``, ``env_file``,
+    ``volume_mounts``, ``warnings``).
+    """
+
+    # ------------------------------------------------------------------
+    # AbstractDetector interface
+    # ------------------------------------------------------------------
+
+    def can_detect(self, path: Union[str, Path]) -> bool:
+        """Return True if *path* contains a ``pyproject.toml`` file."""
+        return (Path(path) / "pyproject.toml").exists()
+
+    def detect(self, path: Union[str, Path]) -> ServerMetadata:
+        """Detect a Python MCP server and return its metadata.
+
+        Args:
+            path: Directory containing the server (``str`` or ``Path``).
+
+        Returns:
+            A fully populated ``ServerMetadata`` instance.
+
+        Raises:
+            ValueError: if ``pyproject.toml`` is missing or the entry
+                point cannot be determined.
+        """
         path = Path(path)
         pyproject_path = path / "pyproject.toml"
 
         if not pyproject_path.exists():
             raise ValueError(f"No pyproject.toml found at {path}")
 
-        # Parse pyproject.toml
+        # --- Parse pyproject.toml ----------------------------------------
         pyproject = toml.load(pyproject_path)
         project = pyproject.get("project", {})
 
-        # Extract basic info
-        name = project.get("name", path.name)
-        dependencies = project.get("dependencies", [])
+        name: str = project.get("name", path.name)
+        dependencies: List[str] = project.get("dependencies", [])
 
-        # Detect Python version
-        python_version = self._extract_python_version(project.get("requires-python", ">=3.10"))
+        # --- Core detection ----------------------------------------------
+        python_version = self._extract_python_version(
+            project.get("requires-python", ">=3.10")
+        )
+        old_server_type, entry_point = self._detect_server_type(path, pyproject)
 
-        # Detect server type and entry point
-        server_type, entry_point = self._detect_server_type(path, pyproject)
+        # Map old "python-*" tag to canonical "python_*" runtime slug.
+        runtime = _RUNTIME_MAP.get(old_server_type, "python_direct")
+        package_manager = "uv" if runtime == "python_uv" else "pip"
 
-        # Create metadata
+        # --- Build canonical metadata ------------------------------------
         metadata = ServerMetadata(
             name=name,
-            server_type=server_type,
-            python_version=python_version,
+            runtime=runtime,
+            runtime_version=python_version,
             entry_point=entry_point,
-            dependencies=dependencies
+            package_manager=package_manager,
+            dependencies=dependencies,
+            # Backward-compat optional fields
+            server_type=old_server_type,
+            python_version=python_version,
         )
 
-        # Find .env file
-        env_file = path / ".env"
-        if env_file.exists():
-            metadata.env_file = str(env_file)
-            metadata.env_vars = self._parse_env_file(env_file)
+        # --- .env file ---------------------------------------------------
+        env_file_path = path / ".env"
+        env_vars_dict: Dict[str, str] = {}
+        if env_file_path.exists():
+            metadata.env_file = str(env_file_path)
+            env_vars_dict = self._parse_env_file(env_file_path)
 
-        # Detect volume requirements
-        metadata.volume_mounts = self._detect_volumes(path, metadata.env_vars)
+        # Canonical field: list of env var *keys*.
+        metadata.env_vars = list(env_vars_dict.keys())
 
-        # Security checks
-        metadata.warnings = self._security_checks(path, metadata.env_vars)
+        # --- Volume detection --------------------------------------------
+        volume_mounts_dict = self._detect_volumes(path, env_vars_dict)
+
+        # Canonical field: list of source paths (keys of the dict).
+        metadata.data_volumes = list(volume_mounts_dict.keys())
+        # Backward-compat field: full source→dest mapping.
+        metadata.volume_mounts = volume_mounts_dict
+
+        # --- Security checks ---------------------------------------------
+        metadata.warnings = self._security_checks(path, env_vars_dict)
 
         return metadata
 
+    # ------------------------------------------------------------------
+    # Private helpers (unchanged logic, minor type annotation updates)
+    # ------------------------------------------------------------------
+
     def _extract_python_version(self, requires_python: str) -> str:
-        """Extract Python version from requires-python string."""
-        # Examples: ">=3.10", ">=3.10,<3.13", "^3.11"
+        """Extract the minimum Python version from a *requires-python* string.
+
+        Examples::
+
+            ">=3.10"          → "3.10"
+            ">=3.10,<3.13"   → "3.10"
+            "^3.11"           → "3.11"
+        """
         match = re.search(r"(\d+\.\d+)", requires_python)
         if match:
             return match.group(1)
-        return "3.11"  # Default
+        return "3.11"  # Sensible default
 
     def _detect_server_type(self, path: Path, pyproject: dict) -> tuple:
-        """Detect server type (uv, direct, fastmcp) and entry point."""
-        project = pyproject.get("project", {})
-        scripts = project.get("scripts", {})
+        """Determine the old-style server type tag and the entry point.
 
-        # Check for console script entry point (uv/pip installable)
+        Returns:
+            A 2-tuple of ``(server_type_str, entry_point_str)`` where
+            *server_type_str* is one of ``"python-uv"``,
+            ``"python-direct"``, or ``"python-fastmcp"``.
+
+        Raises:
+            ValueError: if the entry point cannot be determined.
+        """
+        project = pyproject.get("project", {})
+        scripts: Dict[str, str] = project.get("scripts", {})
+
+        # Console script → installable via uv/pip.
         if scripts:
             script_name = list(scripts.keys())[0]
-            entry_command = script_name
-            return "python-uv", entry_command
+            return "python-uv", script_name
 
-        # Check for main.py (direct execution)
-        main_py = path / "main.py"
-        if main_py.exists():
+        # Direct execution via main.py.
+        if (path / "main.py").exists():
             return "python-direct", "main.py"
 
-        # Check for src/ structure
+        # src/ layout — look for server.py or __main__.py.
         src_dir = path / "src"
         if src_dir.exists():
-            # Look for server.py or __main__.py
             for pattern in ["**/server.py", "**/__main__.py"]:
                 matches = list(src_dir.glob(pattern))
                 if matches:
@@ -112,69 +177,74 @@ class PythonDetector:
         raise ValueError(f"Could not determine entry point for {path}")
 
     def _parse_env_file(self, env_file: Path) -> Dict[str, str]:
-        """Parse .env file and extract variables."""
-        env_vars = {}
+        """Parse a ``.env`` file and return a ``{key: value}`` mapping.
 
+        Lines beginning with ``#`` and empty lines are ignored.  Surrounding
+        quotes are stripped from values.
+        """
+        env_vars: Dict[str, str] = {}
         try:
-            with open(env_file) as f:
-                for line in f:
+            with open(env_file) as fh:
+                for line in fh:
                     line = line.strip()
                     if line and not line.startswith("#") and "=" in line:
                         key, value = line.split("=", 1)
-                        # Remove quotes
                         value = value.strip().strip('"').strip("'")
                         env_vars[key] = value
         except Exception:
             pass
-
         return env_vars
 
-    def _detect_volumes(self, path: Path, env_vars: Dict[str, str]) -> Dict[str, str]:
-        """Detect required volume mounts from env vars and code."""
-        volumes = {}
+    def _detect_volumes(
+        self, path: Path, env_vars: Dict[str, str]
+    ) -> Dict[str, str]:
+        """Detect required volume mounts from env vars and server source files.
 
-        # System paths to exclude (never mount these)
+        Returns:
+            A ``{source_path: container_path}`` mapping.  System paths
+            (``/usr``, ``/etc``, etc.) are never included.
+        """
+        volumes: Dict[str, str] = {}
+
+        # System paths to exclude — never mount these inside a container.
         exclude_paths = {
             "/usr", "/etc", "/var", "/sys", "/proc", "/dev", "/tmp",
             "/opt", "/root", "/lib", "/lib64", "/bin", "/sbin",
-            "/run", "/boot", "/home"
+            "/run", "/boot", "/home",
         }
 
-        # Check for file paths in env vars
         for key, value in env_vars.items():
-            # SSH keys, certificates
+            # SSH keys, certificates, PEM files.
             if any(ext in value.lower() for ext in [".pem", ".key", ".cert", ".crt"]):
                 if Path(value).exists():
                     source_dir = str(Path(value).parent)
                     volumes[source_dir] = "/keys"
 
-            # Database paths (DeepLake, SQLite, etc.)
+            # Database / storage directories.
             if any(db in value.lower() for db in ["database", "storage", ".db"]):
                 if Path(value).exists() and Path(value).is_dir():
                     volumes[value] = "/data"
 
-        # Scan ONLY main server files for hardcoded paths (not installed packages)
+        # Scan ONLY the main server files for hardcoded absolute paths
+        # (installed package trees are intentionally excluded).
         main_files = [
             path / "main.py",
             path / "server.py",
-            path / "src" / "server.py"
+            path / "src" / "server.py",
         ]
 
         for py_file in main_files:
             if not py_file.exists():
                 continue
-
             try:
                 content = py_file.read_text()
-                # Look for absolute paths in strings
-                paths = re.findall(r'["\'](/[^"\']+)["\']', content)
-                for p in paths:
-                    # Skip if it's a system path
-                    if any(p.startswith(excluded) for excluded in exclude_paths):
+                for p in re.findall(r'["\'](/[^"\']+)["\']', content):
+                    if any(p.startswith(excl) for excl in exclude_paths):
                         continue
-
-                    # Only include paths that look like user data
-                    if any(indicator in p for indicator in ["/media/", "/mnt/", "Drive", "Storage"]):
+                    if any(
+                        indicator in p
+                        for indicator in ["/media/", "/mnt/", "Drive", "Storage"]
+                    ):
                         if Path(p).exists() and Path(p).is_dir():
                             volumes[p] = f"/data/{Path(p).name}"
             except Exception:
@@ -182,25 +252,35 @@ class PythonDetector:
 
         return volumes
 
-    def _security_checks(self, path: Path, env_vars: Dict[str, str]) -> List[str]:
-        """Perform security checks and return warnings."""
-        warnings = []
+    def _security_checks(
+        self, path: Path, env_vars: Dict[str, str]
+    ) -> List[str]:
+        """Perform security checks and return a list of human-readable warnings.
 
-        # Check for hardcoded credentials ONLY in main server files
+        Checks performed:
+
+        * Hardcoded credentials (password / secret / api_key / token)
+          in the main server source files.
+        * Overly permissive SSH key file permissions.
+        """
+        warnings: List[str] = []
+
         main_files = [
             path / "main.py",
             path / "server.py",
-            path / "src" / "server.py"
+            path / "src" / "server.py",
         ]
 
         for py_file in main_files:
             if not py_file.exists():
                 continue
-
             try:
                 content = py_file.read_text()
-                # Common credential patterns
-                if re.search(r'(password|secret|api_key|token)\s*=\s*["\'][^"\']+["\']', content, re.I):
+                if re.search(
+                    r'(password|secret|api_key|token)\s*=\s*["\'][^"\']+["\']',
+                    content,
+                    re.I,
+                ):
                     warnings.append(
                         f"Potential hardcoded credential in {py_file.name}. "
                         "Use environment variables instead."
@@ -208,12 +288,11 @@ class PythonDetector:
             except Exception:
                 continue
 
-        # Check for SSH key permissions
         for key, value in env_vars.items():
             if ".pem" in value.lower() or "private_key" in key.lower():
-                if Path(value).exists():
-                    stat = Path(value).stat()
-                    if stat.st_mode & 0o077:
+                p = Path(value)
+                if p.exists():
+                    if p.stat().st_mode & 0o077:
                         warnings.append(
                             f"SSH key {value} has loose permissions. "
                             f"Run: chmod 600 {value}"
